@@ -1,14 +1,13 @@
-#include "CardDeck.h"
+#include "Blackjack.h"
 #include <iostream>
 using namespace std;
 
 int main() {
     cout << "Let's go gambling!" << endl;
 
-    CardDeck deck = CardDeck();
-    deck.print();
-
-    return 0;
+	BlackJack b;
+	b.playGame();
+	return 0;
 }
 
 //------------------------------------------------------------------------------

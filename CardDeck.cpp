@@ -30,14 +30,12 @@ void CardDeck::print() const {
         suitMap[card.getSuit()].push_back(card);
     }
 
-    // Print headers
-    const int columnWidth = 15;  // Set a fixed column width
+    const int columnWidth = 15; 
     for (const auto& suitPair : suitMap) {
         cout << setw(columnWidth) << suitToString(suitPair.first);
     }
     cout << endl;
 
-    // Find the maximum number of cards in any suit
     size_t maxCards = 0;
     for (const auto& suitPair : suitMap) {
         if (suitPair.second.size() > maxCards) {
@@ -45,7 +43,6 @@ void CardDeck::print() const {
         }
     }
 
-    // Print cards in columns
     for (size_t i = 0; i < maxCards; ++i) {
         for (const auto& suitPair : suitMap) {
             if (i < suitPair.second.size()) {
