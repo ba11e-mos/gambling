@@ -59,9 +59,12 @@ void CardDeck::print() const {
 }
 
 void CardDeck::shuffle() {
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine rng(seed);
-    std::shuffle(cards.begin(), cards.end(), rng);
+    srand(time(nullptr));
+    for (int i = 0; i < cards.size(); i++){
+        int ran = rand()%cards.size();
+        swap(i,ran);
+    }
+    
 }
 
 Card CardDeck::drawCard() {
