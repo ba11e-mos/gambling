@@ -1,8 +1,12 @@
-# Ignorer builddir og subprojects mapper
 builddir/
 subprojects/
 .vscode/
-# Ignorer meson.build
+
 meson.build
 Blackjack
 main
+main.exe
+Blackjack.exe
+Card.exe
+CardDeck.exe
+Player.exe
