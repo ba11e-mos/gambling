@@ -1,5 +1,8 @@
 #pragma once
-#include "std_lib_facilities.h"
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
 
 enum class Suit {
 	clubs, 
@@ -58,7 +61,7 @@ class Card {
 		Rank r;
 	public:
 		Card(Suit suit, Rank rank);
-		Suit getSuit();
-		Rank getRank();
-		string toString();
+		Suit getSuit() const;
+		Rank getRank() const;
+		string toString() const;
 };

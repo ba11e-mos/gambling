@@ -1,5 +1,7 @@
 #pragma once
 #include "Card.h"
+#include <vector>
+using namespace std;
 
 // BEGIN: 3a
 class CardDeck {

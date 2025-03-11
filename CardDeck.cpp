@@ -1,7 +1,14 @@
 #include "CardDeck.h"
 #include <algorithm> 
 #include <random>   
-#include <chrono>    
+#include <chrono> 
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+#include <iomanip>
+using namespace std;
+
 
 CardDeck::CardDeck() {
     for (int suit = static_cast<int>(Suit::clubs); suit <= static_cast<int>(Suit::spades); ++suit) {
@@ -18,10 +25,36 @@ void CardDeck::swap(int indeks1, int indeks2) {
 }
 
 void CardDeck::print() const {
+    map<Suit, vector<Card>> suitMap;
     for (const auto& card : cards) {
-        string suit = suitToString(const_cast<Card&>(card).getSuit());
-        string rank = rankToString(const_cast<Card&>(card).getRank());
-        cout << rank << " of " << suit << endl;
+        suitMap[card.getSuit()].push_back(card);
+    }
+
+    // Print headers
+    const int columnWidth = 15;  // Set a fixed column width
+    for (const auto& suitPair : suitMap) {
+        cout << setw(columnWidth) << suitToString(suitPair.first);
+    }
+    cout << endl;
+
+    // Find the maximum number of cards in any suit
+    size_t maxCards = 0;
+    for (const auto& suitPair : suitMap) {
+        if (suitPair.second.size() > maxCards) {
+            maxCards = suitPair.second.size();
+        }
+    }
+
+    // Print cards in columns
+    for (size_t i = 0; i < maxCards; ++i) {
+        for (const auto& suitPair : suitMap) {
+            if (i < suitPair.second.size()) {
+                cout << setw(columnWidth) << rankToString(suitPair.second[i].getRank());
+            } else {
+                cout << setw(columnWidth) << " ";
+            }
+        }
+        cout << endl;
     }
 }
 

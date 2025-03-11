@@ -14,14 +14,14 @@ Card::Card(Suit suit, Rank rank) {
     r = rank;
 }
 
-Suit Card::getSuit() {
+Suit Card::getSuit() const{
     return s;
 }
 
-Rank Card::getRank() {
+Rank Card::getRank() const{
     return r;
 }
 
-string Card::toString() {
+string Card::toString() const{
     return rankToString(r) + " of " + suitToString(s);
 }
