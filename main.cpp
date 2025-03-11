@@ -5,9 +5,9 @@ using namespace std;
 int main() {
     cout << "Let's go gambling!" << endl;
 
-	BlackJack b;
-	b.playGame();
-	return 0;
+	CardDeck deck = CardDeck();
+    deck.shuffle();
+    deck.print();
 }
 
 //------------------------------------------------------------------------------

@@ -8,9 +8,17 @@ bool isAce(Card card) {
     }
 }
 
+bool pictureValue(Card card) {
+    if (suitToString(card.getSuit()) == "Jack" || suitToString(card.getSuit()) == "Queen" || suitToString(card.getSuit()) == "King") {
+        return true;
+    }
+}
+
 int BlackJack::getCardValue(Card card) {
     if (isAce(card)) {
         return 11;
+    } else if (pictureValue(card)) {
+        return 10;
     }
     return static_cast<int>(card.getRank());
 
