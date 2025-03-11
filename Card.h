@@ -21,9 +21,9 @@ enum class Rank {
 	eight,
 	nine,
 	ten,
-	jack = 10,
-	queen = 10,
-	king = 10,
+	jack,
+	queen,
+	king,
 	ace
 };
 
