@@ -1,6 +1,6 @@
 # Ignorer builddir og subprojects mapper
 builddir/
 subprojects/
-
+.vscode/
 # Ignorer meson.build
 meson.build
