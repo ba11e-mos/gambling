@@ -1,0 +1,6 @@
+# Ignorer builddir og subprojects mapper
+builddir/
+subprojects/
+
+# Ignorer meson.build
+meson.build
