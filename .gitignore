@@ -4,3 +4,5 @@ subprojects/
 .vscode/
 # Ignorer meson.build
 meson.build
+Blackjack
+main

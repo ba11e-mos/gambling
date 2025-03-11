@@ -1,17 +1,12 @@
 #include "Blackjack.h"
 
 bool isAce(Card card) {
-    if (suitToString(card.getSuit()) == "Ace") {
-        return true;
-    } else {
-        return false;
-    }
+    return rankToString(card.getRank()) == "ace";
 }
 
 bool pictureValue(Card card) {
-    if (suitToString(card.getSuit()) == "Jack" || suitToString(card.getSuit()) == "Queen" || suitToString(card.getSuit()) == "King") {
-        return true;
-    }
+    string rank = rankToString(card.getRank());
+    return rank == "jack" || rank == "queen" || rank == "king";
 }
 
 int BlackJack::getCardValue(Card card) {
@@ -21,7 +16,6 @@ int BlackJack::getCardValue(Card card) {
         return 10;
     }
     return static_cast<int>(card.getRank());
-
 }
 
 int BlackJack::getHandScore(vector<Card> hand) {
@@ -34,7 +28,7 @@ int BlackJack::getHandScore(vector<Card> hand) {
         }
     }
     while (tot_value > 21 && ace_count > 0) {
-        tot_value -=10;
+        tot_value -= 10;
         ace_count--;
     }
     return tot_value;
