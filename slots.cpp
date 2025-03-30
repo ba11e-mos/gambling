@@ -1,9 +1,18 @@
 #include "slots.h"
 
-SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr) {}
+SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr) {
+    slotsMatrix = new Card*[rows];
+    for (int i = 0; i < rows; i++) {
+        slotsMatrix[i] = new Card[columns];
+    }
+}
 
 SlotsGame::~SlotsGame() {
     delete window;
+    for (int i = 0; i < rows; i++) {
+        delete[] slotsMatrix[i];
+    }
+    delete[] slotsMatrix;
 }
 
 void SlotsGame::slots() {
@@ -65,7 +74,7 @@ void SlotsGame::slots() {
 
         //pengeverdi oppdatering
         std::string pointsString = std::to_string(currentPlayer->getMoney());
-        
+
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
         window->draw_text(betTextPosition, betString, TDT4102::Color::black, pointsFontSize, TDT4102::Font::courier_bold_italic);
@@ -83,4 +92,67 @@ void SlotsGame::slots() {
 void SlotsGame::spin(const TDT4102::Slider& betSlider) {
     int amount = betSlider.getValue();
     currentPlayer->subMoney(amount);
+
+    cardDeck.resetDeck();
+    cardDeck.shuffle();
+
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < columns; col++) {
+            slotsMatrix[row][col] = cardDeck.drawCard();
+        }
+    }
+
+    std::cout << *this << std::endl;
+
+    std::cout << "Du vant! "<< amount*calculateMult() << std::endl;
+    currentPlayer->addMoney(amount*calculateMult());
 }  
+
+
+std::ostream& operator<<(std::ostream& os, const SlotsGame& game) {
+    for (int row = 0; row < game.rows; row++) {
+        for (int col = 0; col < game.columns; col++) {
+            os << game.slotsMatrix[row][col].toString() << "\t";
+        }
+        os << std::endl;
+    }
+    return os;
+}
+
+int SlotsGame::calculateMult(){
+    int hearts = 0;
+    int spades = 0;
+    int clubs = 0;
+    int diamonds = 0;
+    double mult = 0.0;
+
+
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < columns; col++) {
+            std::string suitString = suitToString(slotsMatrix[row][col].getSuit());
+            if (suitString == "hearts") {
+                hearts++;
+            } else if (suitString == "spades") {
+                spades++;
+            } else if (suitString == "clubs") {
+                clubs++;
+            } else if (suitString == "diamonds") {
+                diamonds++;
+            }
+        }
+    }
+
+
+    std::vector<int> suit = {hearts, spades, clubs, diamonds};
+
+    for (int max = 13; max > 5; --max) {
+        double tempMult = 1.0 + (max - 5)*0.5;
+
+        if (std::any_of(suit.begin(), suit.end(), [max](int v) { return v > max;})) {
+            mult = tempMult;
+            break;
+        }
+    }
+
+    return mult;
+}

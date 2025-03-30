@@ -12,6 +12,7 @@ class CardDeck {
         void print() const;
         void shuffle();
         Card drawCard();
+        void resetDeck();
         
 };
 

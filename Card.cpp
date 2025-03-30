@@ -1,6 +1,8 @@
 #include "Card.h"
 #include <string>
 
+
+
 string suitToString(Suit suit) {
     return SuitToStringMap.at(suit);
 }
@@ -8,6 +10,8 @@ string suitToString(Suit suit) {
 string rankToString(Rank rank) {
     return rankToStringMap.at(rank);
 }
+
+Card::Card() : s(Suit::clubs), r(Rank::two) {}
 
 Card::Card(Suit suit, Rank rank) {
     s = suit;

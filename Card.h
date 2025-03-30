@@ -60,6 +60,7 @@ class Card {
 		Suit s;
 		Rank r;
 	public:
+		Card();
 		Card(Suit suit, Rank rank);
 		Suit getSuit() const;
 		Rank getRank() const;

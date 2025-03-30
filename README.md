@@ -20,9 +20,9 @@ Letteste måten å hente ett repo er å klone det hvis det er offentlig. Men i d
 
 Det letteste er å bruke SSH. For å sette opp dette åpner man terminalen (Linux) og gjør følgende.
 
-1. `ssh-keygen -t rsa -b 4096 -C "din-epost@eksempel.com"`
+1. `ssh-keygen -t ed25519 -b 4096 -C "din-epost@eksempel.com"`
 2. `eval "$(ssh-agent -s)"`
-3. `ssh-add ~/.ssh/id_rsa`
+3. `ssh-add ~/.ssh/id_ed25519`
 4. `cat ~/.ssh/id_ed25519.pub`
 5. Kopier outputten fra steg 4. (hele greia) og åpne brukerinnstillingene på github.
 6. Gå til "SSH and GPG keys" og trykk "New SSH key"
