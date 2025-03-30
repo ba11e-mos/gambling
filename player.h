@@ -15,4 +15,5 @@ class player {
         void setMoney(int newMoney);
         void subMoney(int amount);
         void addMoney(int amount);
+        void saveMoney();
 };

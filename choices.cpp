@@ -34,6 +34,7 @@ int chooseGame(player* currentPlayer) {
 }
 
 void playSlots(player* currentPlayer){
-    slots(currentPlayer);
+    SlotsGame SlotsGame(currentPlayer);
+    SlotsGame.slots();
     return;
 }

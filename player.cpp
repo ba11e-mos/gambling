@@ -34,8 +34,8 @@ void player::registerUser(const std::string& newUsername, int startingMoney) {
         std::cout<< "Eksisterer"<< std::endl;
     } else {
         std::ofstream outFile("users.txt", std::ios::app);
-        outFile << username << ","<< startingMoney <<"\n";
-        std::cout << username << " registrert med "<< startingMoney <<" poeng" << std::endl;
+        outFile << *username << ","<< startingMoney <<"\n";
+        std::cout << *username << " registrert med "<< startingMoney <<" poeng" << std::endl;
         player::setMoney(startingMoney);
         outFile.close();
     }
@@ -51,12 +51,38 @@ int player::getMoney() const {
 
 void player::setMoney(int newMoney) {
     *money = newMoney;
+    saveMoney();
 }
 
 void player::subMoney(int amount) {
     *money -= amount;
+    saveMoney();
 }
 
 void player::addMoney(int amount) {
     *money += amount;
+    saveMoney();
+}
+
+void player::saveMoney() {
+    std::ifstream infile("users.txt");
+    std::string line;
+    std::ofstream temp("temp.txt", std::ios::app);
+    int tempMoney;
+
+    while (std::getline(infile, line)) {
+        size_t delimiterPos = line.find(",");
+        std::string existingUsername = line.substr(0, delimiterPos);
+        if (existingUsername == *username) {
+            tempMoney = *money;
+        } else {
+            tempMoney = std::stoi(line.substr(delimiterPos+1));
+        }
+        temp << existingUsername << "," << std::to_string(tempMoney) << "\n";
+    }
+    infile.close();
+    temp.close();
+
+    std::remove("users.txt");
+    std::rename("temp.txt", "users.txt");
 }
