@@ -64,5 +64,6 @@ class Card {
 		Card(Suit suit, Rank rank);
 		Suit getSuit() const;
 		Rank getRank() const;
-		string toString() const;
+		std::string toString() const;
+		std::string cardFileName(Card card);
 };

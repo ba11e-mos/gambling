@@ -31,6 +31,11 @@ int login::loginWindow() {
     const TDT4102::Point infoPosition {static_cast<int>(windowWidth / 2) - static_cast<int>(infoWidth / 2), 50};
 
 
+    /*Bilde*/
+    TDT4102::Image loginImage("assets/hearts-unknown.png");
+    TDT4102::Point loginImagePoint(static_cast<int>(windowWidth / 2) + static_cast<int>(infoWidth/2), 50);
+
+
     /*Tekst input*/
     const unsigned int textWidth = windowWidth/2;
     const unsigned int textHeight = windowHeight/7;
@@ -55,6 +60,7 @@ int login::loginWindow() {
     while (!window->should_close() && !shouldExit) {
         window->next_frame();
         window->draw_text(infoPosition, info, TDT4102::Color::black, infoFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_image(loginImagePoint, loginImage);
 
         if (!usernameText.empty()) {
             int fontSize = 20;
@@ -62,6 +68,7 @@ int login::loginWindow() {
             int usernameTextWidth = usernameText.length() * fontSize * 0.6;
             const TDT4102::Point usernamePosition {static_cast<int>(windowWidth / 2) - static_cast<int>(usernameTextWidth / 2), static_cast<int>(windowHeight / 2)};
             window->draw_text(usernamePosition, usernameText, textColour, fontSize, TDT4102::Font::courier_bold_italic);
+
         }
     }
 
@@ -106,5 +113,6 @@ void login::registerUser() {
     
     window->close();
     shouldExit = true;
+    delete window;
     chooseGame(currentPlayer);
 }

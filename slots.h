@@ -28,7 +28,7 @@ class SlotsGame{
         void spin(const TDT4102::Slider& betSlider);
         friend std::ostream& operator<<(std::ostream& os, const SlotsGame& game);
 
-        int calculateMult();
+        double calculateMult();
 
 };
 

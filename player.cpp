@@ -2,7 +2,7 @@
 #include "iostream"
 #include "fstream"
 
-player::player() : username(new std::string("")), money(new int(0)) {}
+player::player() : username(new std::string("")), money(new double(0.0)) {}
 
 player::~player() {
     delete username;
@@ -31,35 +31,47 @@ void player::registerUser(const std::string& newUsername, int startingMoney) {
     infile.close();
 
     if (userExists) {
-        std::cout<< "Eksisterer"<< std::endl;
+        std::cout<< "Login with user "<< *username <<std::endl;
     } else {
         std::ofstream outFile("users.txt", std::ios::app);
+        if (!outFile) {
+            std::cerr << "Error: Could not open users.txt." << std::endl;
+            return;
+        }
         outFile << *username << ","<< startingMoney <<"\n";
+        outFile.flush();
+        if (outFile.fail()) {
+            std::cerr << "Error: Failed to write to users.txt." << std::endl;
+        } else {
+            std::cout << "Data written to users.txt successfully." << std::endl;
+        }
         std::cout << *username << " registrert med "<< startingMoney <<" poeng" << std::endl;
         player::setMoney(startingMoney);
         outFile.close();
+        
     }
+    return;
 }
 
 std::string player::getUsername() const {
     return *username;
 }
 
-int player::getMoney() const {
+double player::getMoney() const {
     return *money;
 }
 
-void player::setMoney(int newMoney) {
+void player::setMoney(double newMoney) {
     *money = newMoney;
     saveMoney();
 }
 
-void player::subMoney(int amount) {
+void player::subMoney(double amount) {
     *money -= amount;
     saveMoney();
 }
 
-void player::addMoney(int amount) {
+void player::addMoney(double amount) {
     *money += amount;
     saveMoney();
 }
@@ -68,7 +80,7 @@ void player::saveMoney() {
     std::ifstream infile("users.txt");
     std::string line;
     std::ofstream temp("temp.txt", std::ios::app);
-    int tempMoney;
+    double tempMoney;
 
     while (std::getline(infile, line)) {
         size_t delimiterPos = line.find(",");

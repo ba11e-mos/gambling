@@ -3,13 +3,7 @@
 
 
 
-string suitToString(Suit suit) {
-    return SuitToStringMap.at(suit);
-}
 
-string rankToString(Rank rank) {
-    return rankToStringMap.at(rank);
-}
 
 Card::Card() : s(Suit::clubs), r(Rank::two) {}
 
@@ -28,4 +22,19 @@ Rank Card::getRank() const{
 
 string Card::toString() const{
     return rankToString(r) + " of " + suitToString(s);
+}
+
+std::string suitToString(Suit suit) {
+    return SuitToStringMap.at(suit);
+}
+
+std::string rankToString(Rank rank) {
+    return rankToStringMap.at(rank);
+}
+
+std::string Card::cardFileName(Card card) {
+    std::string suit = suitToString(card.getSuit());
+    std::string rank = rankToString(card.getRank());
+    std::string filename = "assets/" + suit + "-" + rank + ".png";
+    return filename;
 }

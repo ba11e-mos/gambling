@@ -42,6 +42,10 @@ void SlotsGame::slots() {
     const TDT4102::Point playSquarePosition {150, 50};
 
 
+    /*Slots matrise*/
+    int rowHeight = 50;
+    int columnWidth = 40;
+
     /*Spinneknapp*/
     const unsigned int spinHeight = static_cast<int>((((windowHeight/5)*2)/4)*3);
     const unsigned int spinWidth = spinHeight;
@@ -75,6 +79,16 @@ void SlotsGame::slots() {
         //pengeverdi oppdatering
         std::string pointsString = std::to_string(currentPlayer->getMoney());
 
+        //Slots matrise
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                TDT4102::Point imagePosition{150+(col*columnWidth), 50+(row*rowHeight)};
+                TDT4102::Image cardImage(slotsMatrix[row][col].cardFileName(slotsMatrix[row][col]));
+                window->draw_image(imagePosition, cardImage);
+
+            }
+        }
+
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
         window->draw_text(betTextPosition, betString, TDT4102::Color::black, pointsFontSize, TDT4102::Font::courier_bold_italic);
@@ -92,7 +106,8 @@ void SlotsGame::slots() {
 void SlotsGame::spin(const TDT4102::Slider& betSlider) {
     int amount = betSlider.getValue();
     currentPlayer->subMoney(amount);
-
+    double mult = 1.0;
+ 
     cardDeck.resetDeck();
     cardDeck.shuffle();
 
@@ -104,8 +119,16 @@ void SlotsGame::spin(const TDT4102::Slider& betSlider) {
 
     std::cout << *this << std::endl;
 
-    std::cout << "Du vant! "<< amount*calculateMult() << std::endl;
-    currentPlayer->addMoney(amount*calculateMult());
+    //mult = calculateMult();
+    if (mult > 0) {
+        std::cout << "Du vant! "<< amount*mult << " " << mult << std::endl;    
+        currentPlayer->addMoney(amount*mult);
+    } else {
+        std::cout << "Ingen gevinst!" << std::endl;
+    }
+
+    
+    
 }  
 
 
@@ -119,7 +142,9 @@ std::ostream& operator<<(std::ostream& os, const SlotsGame& game) {
     return os;
 }
 
-int SlotsGame::calculateMult(){
+
+/*
+double SlotsGame::calculateMult(){
     int hearts = 0;
     int spades = 0;
     int clubs = 0;
@@ -129,7 +154,7 @@ int SlotsGame::calculateMult(){
 
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < columns; col++) {
-            std::string suitString = suitToString(slotsMatrix[row][col].getSuit());
+            std::string suitString = slotsMatrix[row][col].getSuit();
             if (suitString == "hearts") {
                 hearts++;
             } else if (suitString == "spades") {
@@ -142,17 +167,16 @@ int SlotsGame::calculateMult(){
         }
     }
 
+    std::cout << "Hearts: " << hearts << " Spades: " << spades << " Clubs: " << clubs << " Diamonds: " << diamonds << std::endl;
 
-    std::vector<int> suit = {hearts, spades, clubs, diamonds};
+    std::vector<int> suitCount = {hearts, spades, clubs, diamonds};
 
-    for (int max = 13; max > 5; --max) {
-        double tempMult = 1.0 + (max - 5)*0.5;
-
-        if (std::any_of(suit.begin(), suit.end(), [max](int v) { return v > max;})) {
-            mult = tempMult;
-            break;
+    for (int count : suitCount) {
+        if (count >= 5) {
+            mult += 0.25 + (count - 5) * 0.5;
         }
     }
 
     return mult;
 }
+*/

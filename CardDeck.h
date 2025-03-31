@@ -13,6 +13,7 @@ class CardDeck {
         void shuffle();
         Card drawCard();
         void resetDeck();
+        std::string getFileName(Card card);
         
 };
 

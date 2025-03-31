@@ -5,18 +5,19 @@
 
 
 int main() {
-    
+
+      
 	player currentPlayer;
+   
+  currentPlayer.registerUser("noa", 1000);
+
+  SlotsGame SlotsGame(&currentPlayer);
+  SlotsGame.slots();
+  /*
   
-    currentPlayer.registerUser("noa", 1000);
+  login loginWindow(&currentPlayer);
 
-    SlotsGame SlotsGame(&currentPlayer);
-    SlotsGame.slots();
-
-      /* 
-    login loginWindow(&currentPlayer);
-
-    loginWindow.loginWindow();
-   */
-    return 0;
+  loginWindow.loginWindow();
+  */
+  return 0;  
 }
