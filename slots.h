@@ -9,6 +9,8 @@
 #include "CardDeck.h"
 #include <vector>
 #include <algorithm>
+#include <filesystem>
+
 
 class SlotsGame{
     private:
@@ -16,6 +18,7 @@ class SlotsGame{
         TDT4102::AnimationWindow* window;
 
         Card** slotsMatrix;
+        std::string** cardFilePaths;
         CardDeck cardDeck;
         Card card;
         int rows = 3;

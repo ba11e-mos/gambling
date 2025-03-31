@@ -40,11 +40,6 @@ void player::registerUser(const std::string& newUsername, int startingMoney) {
         }
         outFile << *username << ","<< startingMoney <<"\n";
         outFile.flush();
-        if (outFile.fail()) {
-            std::cerr << "Error: Failed to write to users.txt." << std::endl;
-        } else {
-            std::cout << "Data written to users.txt successfully." << std::endl;
-        }
         std::cout << *username << " registrert med "<< startingMoney <<" poeng" << std::endl;
         player::setMoney(startingMoney);
         outFile.close();
@@ -79,12 +74,13 @@ void player::addMoney(double amount) {
 void player::saveMoney() {
     std::ifstream infile("users.txt");
     std::string line;
-    std::ofstream temp("temp.txt", std::ios::app);
-    double tempMoney;
+    std::ofstream temp("temp.txt", std::ios::trunc);
+    
 
     while (std::getline(infile, line)) {
         size_t delimiterPos = line.find(",");
         std::string existingUsername = line.substr(0, delimiterPos);
+        double tempMoney;
         if (existingUsername == *username) {
             tempMoney = *money;
         } else {

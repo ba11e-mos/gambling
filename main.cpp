@@ -2,9 +2,12 @@
 #include "widgets/Button.h"
 #include "choices.h"
 #include "slots.h"
+#include <filesystem>
+
 
 
 int main() {
+  std::cout << "Current working directory: " << std::filesystem::current_path() << std::endl;
 
       
 	player currentPlayer;

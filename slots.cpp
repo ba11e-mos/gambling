@@ -2,8 +2,17 @@
 
 SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr) {
     slotsMatrix = new Card*[rows];
+    cardFilePaths = new std::string*[rows];
+
     for (int i = 0; i < rows; i++) {
         slotsMatrix[i] = new Card[columns];
+        cardFilePaths[i] = new std::string[columns];
+        for (int j = 0; j < columns; j++) {
+            std::filesystem::path filePath = "assets";
+            filePath /= "spades-unknown.png";
+            cardFilePaths[i][j] = filePath.string();
+        }
+
     }
 }
 
@@ -11,15 +20,17 @@ SlotsGame::~SlotsGame() {
     delete window;
     for (int i = 0; i < rows; i++) {
         delete[] slotsMatrix[i];
+        delete[] cardFilePaths[i];
     }
     delete[] slotsMatrix;
+    delete[] cardFilePaths;
 }
 
 void SlotsGame::slots() {
     std::string windowTitle = "Gambling++";
-    const unsigned int windowHeight = 720;
+    const unsigned int windowHeight = 1080;
     const unsigned int windowWidth = 1280;
-    window = new TDT4102::AnimationWindow(300, 300, windowWidth, windowHeight, windowTitle);
+    window = new TDT4102::AnimationWindow(300, 10, windowWidth, windowHeight, windowTitle);
 
 
     /*Brukernavn*/
@@ -43,8 +54,11 @@ void SlotsGame::slots() {
 
 
     /*Slots matrise*/
-    int rowHeight = 50;
-    int columnWidth = 40;
+    const unsigned int imageWidth = (playSquareWidth-100)/5;
+    const unsigned int imageHeight = static_cast<int>(imageWidth*1.5);
+    int rowHeight = imageHeight+10;
+    int columnWidth = imageWidth+10;
+    
 
     /*Spinneknapp*/
     const unsigned int spinHeight = static_cast<int>((((windowHeight/5)*2)/4)*3);
@@ -80,14 +94,8 @@ void SlotsGame::slots() {
         std::string pointsString = std::to_string(currentPlayer->getMoney());
 
         //Slots matrise
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < columns; col++) {
-                TDT4102::Point imagePosition{150+(col*columnWidth), 50+(row*rowHeight)};
-                TDT4102::Image cardImage(slotsMatrix[row][col].cardFileName(slotsMatrix[row][col]));
-                window->draw_image(imagePosition, cardImage);
+        
 
-            }
-        }
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
@@ -100,6 +108,16 @@ void SlotsGame::slots() {
         
         //spillvindu
         window->draw_rectangle(playSquarePosition, playSquareWidth, playSquareHeight, playSquareFill, playSquareEdge);
+        
+        
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                TDT4102::Point imagePosition{200+(col*columnWidth), 50+(row*rowHeight)};
+                TDT4102::Image cardImage(cardFilePaths[row][col]);
+                window->draw_image(imagePosition, cardImage, imageWidth, imageHeight);
+
+            }
+        }
     }
 }
 
@@ -114,12 +132,15 @@ void SlotsGame::spin(const TDT4102::Slider& betSlider) {
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < columns; col++) {
             slotsMatrix[row][col] = cardDeck.drawCard();
+            std::cout << slotsMatrix[row][col].toString() << std::endl;
+            cardFilePaths[row][col] = slotsMatrix[row][col].cardFileName(slotsMatrix[row][col]);
+            std::cout << slotsMatrix[row][col].cardFileName(slotsMatrix[row][col]) << std::endl;
         }
     }
 
     std::cout << *this << std::endl;
 
-    //mult = calculateMult();
+    mult = calculateMult();
     if (mult > 0) {
         std::cout << "Du vant! "<< amount*mult << " " << mult << std::endl;    
         currentPlayer->addMoney(amount*mult);
@@ -143,7 +164,7 @@ std::ostream& operator<<(std::ostream& os, const SlotsGame& game) {
 }
 
 
-/*
+
 double SlotsGame::calculateMult(){
     int hearts = 0;
     int spades = 0;
@@ -154,7 +175,7 @@ double SlotsGame::calculateMult(){
 
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < columns; col++) {
-            std::string suitString = slotsMatrix[row][col].getSuit();
+            std::string suitString = suitToString(slotsMatrix[row][col].getSuit());
             if (suitString == "hearts") {
                 hearts++;
             } else if (suitString == "spades") {
@@ -179,4 +200,4 @@ double SlotsGame::calculateMult(){
 
     return mult;
 }
-*/
+

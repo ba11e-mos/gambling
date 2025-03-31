@@ -1,9 +1,6 @@
 #include "Card.h"
 #include <string>
-
-
-
-
+#include <filesystem>
 
 Card::Card() : s(Suit::clubs), r(Rank::two) {}
 
@@ -25,16 +22,36 @@ string Card::toString() const{
 }
 
 std::string suitToString(Suit suit) {
-    return SuitToStringMap.at(suit);
+    auto it = SuitToStringMap.find(suit);
+    if (it == SuitToStringMap.end()) {
+        std::cerr << "Error: Invalid suit value!" << std::endl;
+        return "";
+    }
+    return it->second;
 }
 
 std::string rankToString(Rank rank) {
-    return rankToStringMap.at(rank);
+    auto it = rankToStringMap.find(rank);
+    if (it == rankToStringMap.end()) {
+        std::cerr << "Error: Invalid rank value!" << std::endl;
+        return "";
+    }
+    return it->second;
 }
 
 std::string Card::cardFileName(Card card) {
     std::string suit = suitToString(card.getSuit());
     std::string rank = rankToString(card.getRank());
-    std::string filename = "assets/" + suit + "-" + rank + ".png";
-    return filename;
+
+    if (suit.empty() || rank.empty()) {
+        throw std::runtime_error("Invalid card: suit or rank is empty!");
+    }
+
+
+    std::filesystem::path filePath = "assets";
+    filePath /= suit + "-" + rank + ".png";
+
+    std::cout << "Generated file path: " << filePath.string() << std::endl;
+
+    return filePath.string();
 }
