@@ -19,10 +19,13 @@ class SlotsGame{
 
         Card** slotsMatrix;
         std::string** cardFilePaths;
+        TDT4102::Image** slotsImageMatrix;
         CardDeck cardDeck;
         Card card;
         int rows = 3;
         int columns = 5;
+        bool spinning = true;
+        int rowHeight;
     public:
         SlotsGame(player* playerPtr);
         ~SlotsGame();

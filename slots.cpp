@@ -2,15 +2,18 @@
 
 SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr) {
     slotsMatrix = new Card*[rows];
-    cardFilePaths = new std::string*[rows];
+    cardFilePahttps://mail.google.com/mail/u/1/#inboxths = new std::string*[rows];
+    slotsImageMatrix = new TDT4102::Image*[rows];
 
     for (int i = 0; i < rows; i++) {
         slotsMatrix[i] = new Card[columns];
         cardFilePaths[i] = new std::string[columns];
+        slotsImageMatrix[i] = new TDT4102::Image[columns];
         for (int j = 0; j < columns; j++) {
             std::filesystem::path filePath = "assets";
             filePath /= "spades-unknown.png";
             cardFilePaths[i][j] = filePath.string();
+            slotsImageMatrix[i][j] = TDT4102::Image(cardFilePaths[i][j]);
         }
 
     }
@@ -21,9 +24,11 @@ SlotsGame::~SlotsGame() {
     for (int i = 0; i < rows; i++) {
         delete[] slotsMatrix[i];
         delete[] cardFilePaths[i];
+        delete[] slotsImageMatrix[i];
     }
     delete[] slotsMatrix;
     delete[] cardFilePaths;
+    delete[] slotsImageMatrix;
 }
 
 void SlotsGame::slots() {
@@ -46,8 +51,8 @@ void SlotsGame::slots() {
     const TDT4102::Point pointsPosition {static_cast<int>(windowWidth)-static_cast<int>(10+pointsLenght), 10};
 
     /*Spillvindu*/
-    const unsigned int playSquareHeight = static_cast<int>(3*(windowHeight/5)-50);
     const unsigned int playSquareWidth = windowWidth-300;
+    const unsigned int playSquareHeight = static_cast<int>(playSquareWidth*0.85);
     TDT4102::Color playSquareFill = TDT4102::Color::white;
     TDT4102::Color playSquareEdge = TDT4102::Color::black;
     const TDT4102::Point playSquarePosition {150, 50};
@@ -58,16 +63,20 @@ void SlotsGame::slots() {
     const unsigned int imageHeight = static_cast<int>(imageWidth*1.5);
     int rowHeight = imageHeight+10;
     int columnWidth = imageWidth+10;
+    int imageYPos = -(rowHeight*rows);
+    int slidePos = (playSquareHeight+50)/60; 
     
 
     /*Spinneknapp*/
-    const unsigned int spinHeight = static_cast<int>((((windowHeight/5)*2)/4)*3);
-    const unsigned int spinWidth = spinHeight;
+    const unsigned int spinWidth = static_cast<int>(windowWidth/6);
+    const unsigned int spinHeight = static_cast<int>(spinWidth/2);
+    
     TDT4102::Color spinFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point spinPosition {windowWidth/2-spinWidth/2, static_cast<int>(((windowHeight/5)*3)+((((windowHeight/5)*2)-(spinHeight))/2))};
+    const TDT4102::Point spinPosition {windowWidth/2-spinWidth/2, static_cast<int>(playSquareHeight+50+spinHeight/2)};
     std::string spinLabel = "Spinn!";
     TDT4102::Button spinButton {spinPosition, spinWidth, spinHeight, spinLabel};
     spinButton.setButtonColor(spinFill);
+    spinButton.setLabelColor(TDT4102::Color::black);
     window->add(spinButton);
 
 
@@ -78,14 +87,21 @@ void SlotsGame::slots() {
     const unsigned int maxBet = 100;
     const unsigned int startBet = 10;
     const unsigned int step = 1;
-    const TDT4102::Point betPosition {windowWidth-betWidth-50, static_cast<int>(((windowHeight/5)*3)+((((windowHeight/5)*2)-(betHeight))/2))};
+    const unsigned int betFontSize =  30;
+    const TDT4102::Point betPosition {windowWidth-betWidth*2, static_cast<int>(playSquareHeight+betHeight)};
     TDT4102::Slider betSlider {betPosition, betWidth, betHeight, minBet, maxBet, startBet, step};
     
-    const TDT4102::Point betTextPosition {windowWidth-betWidth-50, static_cast<int>(((windowHeight/5)*3)+((((windowHeight/5)*2)-(betHeight))/2))+betHeight};
+    const TDT4102::Point betTextPosition {windowWidth-betWidth*2-50, static_cast<int>(playSquareHeight+betHeight+betFontSize*0.85)};
     window->add(betSlider);
 
     /*Callback-funksjoner*/
-    spinButton.setCallback([this, &betSlider]() {spin(betSlider);});
+    spinButton.setCallback([this, &betSlider, &imageYPos, slidePos, &rowHeight]() {
+        if (spinning) return;
+        spin(betSlider);
+        spinning = true;
+        imageYPos = -(rowHeight*rows);
+
+    });
 
     while (!window->should_close()) {
         window->next_frame();
@@ -99,7 +115,7 @@ void SlotsGame::slots() {
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
-        window->draw_text(betTextPosition, betString, TDT4102::Color::black, pointsFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, TDT4102::Font::courier_bold_italic);
 
 
         //brukernavn og penger på skjerm
@@ -108,13 +124,17 @@ void SlotsGame::slots() {
         
         //spillvindu
         window->draw_rectangle(playSquarePosition, playSquareWidth, playSquareHeight, playSquareFill, playSquareEdge);
-        
+        if (spinning) {
+            imageYPos += slidePos;
+            if (imageYPos > 50) {
+                spinning = false;
+            }
+        }
         
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
-                TDT4102::Point imagePosition{200+(col*columnWidth), 50+(row*rowHeight)};
-                TDT4102::Image cardImage(cardFilePaths[row][col]);
-                window->draw_image(imagePosition, cardImage, imageWidth, imageHeight);
+                TDT4102::Point imagePosition{175+(col*columnWidth), imageYPos+(row*rowHeight)};
+                window->draw_image(imagePosition, slotsImageMatrix[row][col], imageWidth, imageHeight);
 
             }
         }
@@ -131,14 +151,16 @@ void SlotsGame::spin(const TDT4102::Slider& betSlider) {
 
     for (int row = 0; row < rows; row++) {
         for (int col = 0; col < columns; col++) {
+
             slotsMatrix[row][col] = cardDeck.drawCard();
-            std::cout << slotsMatrix[row][col].toString() << std::endl;
             cardFilePaths[row][col] = slotsMatrix[row][col].cardFileName(slotsMatrix[row][col]);
-            std::cout << slotsMatrix[row][col].cardFileName(slotsMatrix[row][col]) << std::endl;
+            slotsImageMatrix[row][col] = TDT4102::Image(cardFilePaths[row][col]);
         }
     }
 
-    std::cout << *this << std::endl;
+    std::cout << *this << std::endl;    
+
+
 
     mult = calculateMult();
     if (mult > 0) {
@@ -193,8 +215,8 @@ double SlotsGame::calculateMult(){
     std::vector<int> suitCount = {hearts, spades, clubs, diamonds};
 
     for (int count : suitCount) {
-        if (count >= 5) {
-            mult += 0.25 + (count - 5) * 0.5;
+        if (count >= 6) {
+            mult += 0.5 + (count - 6) * 0.5;
         }
     }
 
