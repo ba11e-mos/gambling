@@ -2,7 +2,7 @@
 
 SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr) {
     slotsMatrix = new Card*[rows];
-    cardFilePahttps://mail.google.com/mail/u/1/#inboxths = new std::string*[rows];
+    cardFilePaths = new std::string*[rows];
     slotsImageMatrix = new TDT4102::Image*[rows];
 
     for (int i = 0; i < rows; i++) {
