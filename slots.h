@@ -25,6 +25,7 @@ class SlotsGame{
         int rows = 3;
         int columns = 5;
         bool spinning = true;
+        bool win = false;
         int rowHeight;
     public:
         SlotsGame(player* playerPtr);
@@ -35,6 +36,6 @@ class SlotsGame{
         friend std::ostream& operator<<(std::ostream& os, const SlotsGame& game);
 
         double calculateMult();
-
+        std::string formatDouble(double value);
 };
 

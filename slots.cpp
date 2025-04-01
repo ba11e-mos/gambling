@@ -94,9 +94,25 @@ void SlotsGame::slots() {
     const TDT4102::Point betTextPosition {windowWidth-betWidth*2-50, static_cast<int>(playSquareHeight+betHeight+betFontSize*0.85)};
     window->add(betSlider);
 
+
+    /*Win-overlay*/
+    TDT4102::Color overlayColor(0, 0, 0, 128);
+    TDT4102::Point overlayPosition {0,0};
+    const unsigned int winFontSize = 50;
+    double winAmount = 0;
+    bool jackpot = false;
+    TDT4102::Point bigWinPos {static_cast<int>((windowWidth/2)-(3.5*winFontSize)), windowHeight/2-4*winFontSize};
+    TDT4102::Point winPos {static_cast<int>((windowWidth/2)-(2*winFontSize)), windowHeight/2-2*winFontSize};
+    TDT4102::Point yippiPos {static_cast<int>((windowWidth/2)-(1.25*winFontSize)), windowHeight/2+2*winFontSize};
+
+    TDT4102::Point winTextPos {(windowWidth/2)-200, playSquareHeight+50};
+
+    
+
     /*Callback-funksjoner*/
-    spinButton.setCallback([this, &betSlider, &imageYPos, slidePos, &rowHeight]() {
+    spinButton.setCallback([this, &betSlider, &imageYPos, slidePos, &rowHeight, &jackpot]() {
         if (spinning) return;
+        if (jackpot) return;
         spin(betSlider);
         spinning = true;
         imageYPos = -(rowHeight*rows);
@@ -106,12 +122,21 @@ void SlotsGame::slots() {
     while (!window->should_close()) {
         window->next_frame();
 
-        //pengeverdi oppdatering
-        std::string pointsString = std::to_string(currentPlayer->getMoney());
-
-        //Slots matrise
+        /*Input*/
+        bool mouseDown = window->is_left_mouse_button_down();
+        bool spaceKeyDown = window->is_key_down(KeyboardKey::SPACE);
+        if (!spinning and !jackpot) {
+            if (spaceKeyDown) {
+                spin(betSlider);
+                spinning = true;
+                imageYPos = -(rowHeight*rows);
+            } 
+        }
         
 
+
+        //pengeverdi oppdatering
+        std::string pointsString = formatDouble(currentPlayer->getMoney());
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
@@ -130,13 +155,47 @@ void SlotsGame::slots() {
                 spinning = false;
             }
         }
-        
+
+        //Slots matrise
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
                 TDT4102::Point imagePosition{175+(col*columnWidth), imageYPos+(row*rowHeight)};
                 window->draw_image(imagePosition, slotsImageMatrix[row][col], imageWidth, imageHeight);
 
             }
+        }
+
+        //win overlay
+        if (win and !spinning) {
+            double winTotal = calculateMult()*betSlider.getValue();
+            if (winTotal >= 50) {
+                jackpot = true;
+                window->draw_rectangle(overlayPosition, windowWidth, windowHeight, overlayColor);
+                
+                window->draw_text(bigWinPos, "BIG WIN", TDT4102::Color::black, winFontSize*2);
+                window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);
+
+                TDT4102::Point amountPos {static_cast<int>((windowWidth/2)-(((formatDouble(winAmount).length()*0.375))*winFontSize)), windowHeight/2};
+
+                window->draw_text(amountPos, formatDouble(winAmount), TDT4102::Color::black, static_cast<int>(winFontSize*1.5));
+                window->draw_text(yippiPos, "Yippi!", TDT4102::Color::black, winFontSize);
+
+                winAmount += 0.1;
+                
+                if (winAmount >= winTotal) {
+                    winAmount = winTotal;
+                    if (mouseDown || spaceKeyDown) {
+                        win = false;
+                        jackpot = false;
+                        winAmount = 0;
+                    }  
+                }  
+                
+            } else {
+                std::string winText = "You won " + formatDouble(winTotal) + "!!!";
+                window->draw_text(winTextPos, winText);
+            }
+            
         }
     }
 }
@@ -145,6 +204,7 @@ void SlotsGame::spin(const TDT4102::Slider& betSlider) {
     int amount = betSlider.getValue();
     currentPlayer->subMoney(amount);
     double mult = 1.0;
+    win = false;
  
     cardDeck.resetDeck();
     cardDeck.shuffle();
@@ -164,8 +224,10 @@ void SlotsGame::spin(const TDT4102::Slider& betSlider) {
 
     mult = calculateMult();
     if (mult > 0) {
-        std::cout << "Du vant! "<< amount*mult << " " << mult << std::endl;    
+        std::cout << "Du vant! "<< amount*mult << " " << mult << std::endl;
+        win = true;
         currentPlayer->addMoney(amount*mult);
+
     } else {
         std::cout << "Ingen gevinst!" << std::endl;
     }
@@ -210,16 +272,21 @@ double SlotsGame::calculateMult(){
         }
     }
 
-    std::cout << "Hearts: " << hearts << " Spades: " << spades << " Clubs: " << clubs << " Diamonds: " << diamonds << std::endl;
 
     std::vector<int> suitCount = {hearts, spades, clubs, diamonds};
 
     for (int count : suitCount) {
         if (count >= 6) {
-            mult += 0.5 + (count - 6) * 0.5;
+            mult += 1 + (count - 6) * 0.5;
         }
     }
 
     return mult;
 }
 
+/*Formatering av double til string med to desimaler*/
+std::string SlotsGame::formatDouble(double value) {
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(2) << value;
+    return stream.str();
+}
