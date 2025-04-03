@@ -11,6 +11,45 @@
 #include <algorithm>
 #include <filesystem>
 
+struct Layout {
+
+    int pointsLenght;
+    TDT4102::Point pointsPosition;
+
+    unsigned int playSquareWidth;
+    unsigned int playSquareHeight;
+    TDT4102::Point playSquarePosition;
+
+    unsigned int imageWidth;
+    unsigned int imageHeight;
+    int imageYPos;
+
+    unsigned int spinWidth;
+    unsigned int spinHeight;
+    TDT4102::Point spinPosition;
+    std::string spinLabel;
+    TDT4102::Button spinButton;
+
+
+    TDT4102::Slider betSlider;
+
+
+    unsigned int betWidth;
+    unsigned int betHeight;
+    TDT4102::Point betPosition;
+    TDT4102::Point betTextPosition;
+
+    TDT4102::Point overlayPosition;
+    TDT4102::Point bigWinPos;
+    TDT4102::Point winPos;
+    TDT4102::Point yippiPos;
+
+    unsigned int windowWidth;
+    unsigned int windowHeight;
+
+    Layout() : betSlider({0, 0}, 0, 0, 0, 0, 0, 0), spinButton({0, 0}, 0, 0, spinLabel) {}
+
+};
 
 class SlotsGame{
     private:
@@ -26,6 +65,7 @@ class SlotsGame{
         int columns = 5;
         bool spinning = true;
         bool win = false;
+        bool jackpot;
         int rowHeight;
     public:
         SlotsGame(player* playerPtr);
@@ -37,5 +77,9 @@ class SlotsGame{
 
         double calculateMult();
         std::string formatDouble(double value);
+        void updateLayout(Layout& layout);
+        void spinButton(Layout& layout);
+    
 };
+
 

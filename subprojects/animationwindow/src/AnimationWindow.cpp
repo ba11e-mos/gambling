@@ -113,6 +113,11 @@ void TDT4102::AnimationWindow::pump_events() {
             }
         } else if (event.type == SDL_MOUSEWHEEL) {
             deltaMouseWheel = event.wheel.preciseY; // The amount scrolled vertically, positive away from the user and negative toward the user
+        } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
+            resized = true;
+            int newWidth, newHeight;
+            SDL_GetWindowSize(windowHandle, &newWidth, &newHeight);
+            std::cout << "Window resized to: " << newWidth << "x" << newHeight << std::endl;
         }
 
         if(!destroyed) {
@@ -120,6 +125,21 @@ void TDT4102::AnimationWindow::pump_events() {
         }
         
     }
+}
+
+//Noas søplekode som sier om vinduet resizes :)
+bool TDT4102::AnimationWindow::was_resized() {
+    bool wasResized = resized;
+    resized = false; 
+    return wasResized;
+}
+
+void TDT4102::AnimationWindow::remove(TDT4102::Widget& widgetToRemove) {
+    widgets.erase(std::remove_if(widgets.begin(), widgets.end(),
+        [&widgetToRemove](const std::reference_wrapper<TDT4102::Widget>& widget) {
+            return &widget.get() == &widgetToRemove;
+        }),
+    widgets.end());
 }
 
 void TDT4102::AnimationWindow::show_frame() {
@@ -142,6 +162,7 @@ void TDT4102::AnimationWindow::update_gui() {
 }
 
 void TDT4102::AnimationWindow::next_frame() {
+    pump_events();
     update_gui();
     nk_sdl_render(NK_ANTI_ALIASING_ON);
 
