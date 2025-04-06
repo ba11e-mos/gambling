@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include "iostream"
+#include "fstream"
+#include <iomanip>
 
 class player {
     private:
@@ -16,4 +19,5 @@ class player {
         void subMoney(double amount);
         void addMoney(double amount);
         void saveMoney();
+        std::string formatDouble(double value);
 };

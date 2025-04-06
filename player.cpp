@@ -94,3 +94,11 @@ void player::saveMoney() {
     std::remove("users.txt");
     std::rename("temp.txt", "users.txt");
 }
+
+
+/*Formatering av double til string med to desimaler*/
+std::string player::formatDouble(double value) {
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(2) << value;
+    return stream.str();
+}

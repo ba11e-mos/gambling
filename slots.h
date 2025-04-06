@@ -36,6 +36,5 @@ class SlotsGame{
         friend std::ostream& operator<<(std::ostream& os, const SlotsGame& game);
 
         double calculateMult();
-        std::string formatDouble(double value);
 };
 

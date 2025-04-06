@@ -136,7 +136,7 @@ void SlotsGame::slots() {
 
 
         //pengeverdi oppdatering
-        std::string pointsString = formatDouble(currentPlayer->getMoney());
+        std::string pointsString = currentPlayer->formatDouble(currentPlayer->getMoney());
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
@@ -175,9 +175,9 @@ void SlotsGame::slots() {
                 window->draw_text(bigWinPos, "BIG WIN", TDT4102::Color::black, winFontSize*2);
                 window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);
 
-                TDT4102::Point amountPos {static_cast<int>((windowWidth/2)-(((formatDouble(winAmount).length()*0.375))*winFontSize)), windowHeight/2};
+                TDT4102::Point amountPos {static_cast<int>((windowWidth/2)-(((currentPlayer->formatDouble(winAmount).length()*0.375))*winFontSize)), windowHeight/2};
 
-                window->draw_text(amountPos, formatDouble(winAmount), TDT4102::Color::black, static_cast<int>(winFontSize*1.5));
+                window->draw_text(amountPos, currentPlayer->formatDouble(winAmount), TDT4102::Color::black, static_cast<int>(winFontSize*1.5));
                 window->draw_text(yippiPos, "Yippi!", TDT4102::Color::black, winFontSize);
 
                 winAmount += 0.1;
@@ -192,7 +192,7 @@ void SlotsGame::slots() {
                 }  
                 
             } else {
-                std::string winText = "You won " + formatDouble(winTotal) + "!!!";
+                std::string winText = "You won " + currentPlayer->formatDouble(winTotal) + "!!!";
                 window->draw_text(winTextPos, winText);
             }
             
@@ -284,9 +284,3 @@ double SlotsGame::calculateMult(){
     return mult;
 }
 
-/*Formatering av double til string med to desimaler*/
-std::string SlotsGame::formatDouble(double value) {
-    std::ostringstream stream;
-    stream << std::fixed << std::setprecision(2) << value;
-    return stream.str();
-}
