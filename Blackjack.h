@@ -4,7 +4,21 @@
 #include "player.h"
 #include <vector>
 #include <string>
+#include "widgets/Button.h"
+#include "widgets/Slider.h"
+#include <thread>
+#include <chrono>
 
+enum class GameState {
+    WaitingForBet,
+    PlayerFirstCard,
+    DealerFirstCard,
+    PlayerSecondCard,
+    DealerSecondCard,
+    GameInProgress,
+    ShowDealerHand,
+    GameOver
+};
 
 class BlackJackGame {
     private: 
@@ -14,12 +28,12 @@ class BlackJackGame {
         CardDeck deck;
         vector<Card> playerHand;
         vector<Card> dealerHand;
-        vector<TDT4102::Image> playerImageHand;
-        vector<TDT4102::Image> dealerImageHand;
+        vector<std::shared_ptr<TDT4102::Image>> playerImageHand;
+        vector<std::shared_ptr<TDT4102::Image>> dealerImageHand;
 
-        int playerHandSum;
-        int dealerHandSum;
+        bool showDealerHand = false;
 
+        GameState gameState;
 
     public:
         BlackJackGame(player* playerPtr);
@@ -32,7 +46,15 @@ class BlackJackGame {
         void drawDealerCard();
 
         void blackJack();
+
+        void hit();
+        void stand();
+        void split();
+        void doubleDown();
 };
 
 bool isAce(Card card);
 bool pictureValue(Card card);
+
+std::ostream& operator<<(std::ostream& os, const std::vector<Card>& hand);
+

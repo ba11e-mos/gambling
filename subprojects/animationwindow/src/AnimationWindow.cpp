@@ -363,6 +363,10 @@ int TDT4102::AnimationWindow::height() const {
     return getWindowDimensions().y;
 }
 
+SDL_Window* TDT4102::AnimationWindow::getWindowHandle() {
+    return windowHandle;
+}
+
 bool TDT4102::AnimationWindow::is_left_mouse_button_down() const {
     return currentLeftMouseButtonState;
 }

@@ -131,6 +131,8 @@ class AnimationWindow {
     void setBackgroundColor(TDT4102::Color newBackgroundColor);
 
     float get_delta_mouse_wheel() const;
+
+    SDL_Window* getWindowHandle();
  
 
 };
