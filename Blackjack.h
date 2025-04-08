@@ -16,7 +16,9 @@ enum class GameState {
     PlayerSecondCard,
     DealerSecondCard,
     GameInProgress,
+    AnimatingCard,
     ShowDealerHand,
+    BlackJack,
     GameOver
 };
 
@@ -34,6 +36,7 @@ class BlackJackGame {
         bool showDealerHand = false;
 
         GameState gameState;
+        GameState prevGameState;
 
     public:
         BlackJackGame(player* playerPtr);
