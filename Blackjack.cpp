@@ -86,8 +86,8 @@ void BlackJackGame::blackJack() {
     std::cout << scaleFactor << std::endl;
 
 
-    int windowWidth = static_cast<int>(displayBounds.w*(1.6));
-    int windowHeight = static_cast<int>(displayBounds.h*(1.6));
+    int windowWidth = static_cast<int>(displayBounds.w*(scaleFactor));
+    int windowHeight = static_cast<int>(displayBounds.h*(scaleFactor));
 
     SDL_Window* sdlWindow = window->getWindowHandle();
     if (!sdlWindow) {
@@ -118,12 +118,12 @@ void BlackJackGame::blackJack() {
     const unsigned int betHeight = static_cast<int>(betWidth/2);
 
     TDT4102::Color spinFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point betPosition {windowWidth-betWidth*2, static_cast<int>(windowHeight-betHeight*2)};
+    const TDT4102::Point betPosition {static_cast<int>(windowWidth-betWidth*2), static_cast<int>(windowHeight-betHeight*2)};
     std::string spinLabel = "Bet";
-    TDT4102::Button spinButton {betPosition, betWidth, betHeight, spinLabel};
-    spinButton.setButtonColor(spinFill);
-    spinButton.setLabelColor(TDT4102::Color::black);
-    window->add(spinButton);
+    TDT4102::Button betButton {betPosition, betWidth, betHeight, spinLabel};
+    betButton.setButtonColor(spinFill);
+    betButton.setLabelColor(TDT4102::Color::black);
+    window->add(betButton);
 
     /*Innsats slider*/
     const unsigned int betSliderHeight = 100;
@@ -133,10 +133,10 @@ void BlackJackGame::blackJack() {
     const unsigned int startBet = 10;
     const unsigned int step = 1;
     const unsigned int betFontSize =  30;
-    const TDT4102::Point betSliderPosition {windowWidth-betSliderWidth*2, static_cast<int>(windowHeight-betHeight)};
+    const TDT4102::Point betSliderPosition {static_cast<int>(windowWidth-betSliderWidth*2), static_cast<int>(windowHeight-betHeight)};
     TDT4102::Slider betSlider {betSliderPosition, betWidth, betHeight, minBet, maxBet, startBet, step};
     
-    const TDT4102::Point betTextPosition {betSliderPosition.x-100, betSliderPosition.y+(betFontSize)};
+    const TDT4102::Point betTextPosition {betSliderPosition.x-100, static_cast<int>(betSliderPosition.y+(betFontSize))};
     window->add(betSlider);
 
     /*Hit knapp*/
@@ -144,11 +144,11 @@ void BlackJackGame::blackJack() {
     const unsigned int hitHeight = static_cast<int>(hitWidth/2);
 
     TDT4102::Color hitFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point hitPosition {windowWidth/2-hitWidth*3, static_cast<int>(windowHeight-hitHeight*2)};
+    const TDT4102::Point hitPosition {static_cast<int>(windowWidth/2-hitWidth*3), static_cast<int>(windowHeight-hitHeight*2)};
     std::string hitLabel = "Hit";
     TDT4102::Button hitButton {hitPosition, hitWidth, hitHeight, hitLabel};
-    spinButton.setButtonColor(hitFill);
-    spinButton.setLabelColor(TDT4102::Color::black);
+    hitButton.setButtonColor(hitFill);
+    hitButton.setLabelColor(TDT4102::Color::black);
     window->add(hitButton);
 
     /*Stand knapp*/
@@ -156,11 +156,11 @@ void BlackJackGame::blackJack() {
     const unsigned int standHeight = static_cast<int>(standWidth/2);
 
     TDT4102::Color standFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point standPosition {windowWidth/2-standWidth*4, static_cast<int>(windowHeight-standHeight*2)};
+    const TDT4102::Point standPosition {static_cast<int>(windowWidth/2-standWidth*4), static_cast<int>(windowHeight-standHeight*2)};
     std::string standLabel = "Stand";
     TDT4102::Button standButton {standPosition, standWidth, standHeight, standLabel};
-    spinButton.setButtonColor(standFill);
-    spinButton.setLabelColor(TDT4102::Color::black);
+    standButton.setButtonColor(standFill);
+    standButton.setLabelColor(TDT4102::Color::black);
     window->add(standButton);
 
 
@@ -168,32 +168,57 @@ void BlackJackGame::blackJack() {
     const unsigned int imageWidth = windowWidth/12;
     const unsigned int imageHeight = static_cast<int>(imageWidth*1.5);
 
+    /*Hånd verdi*/
+    int valueFont = 30;
+    TDT4102::Point playerHandValue {static_cast<int>(windowWidth*(3.0/4)+valueFont),static_cast<int>(windowHeight/2+valueFont)};
+    TDT4102::Point dealerHandValue {static_cast<int>(windowWidth*(3.0/4)+valueFont),static_cast<int>(windowHeight/2-valueFont)};
+
+    /* Spilltilstand */
+    gameState = GameState::WaitingForBet;
+    auto lastUpdateTime = std::chrono::steady_clock::now();
+
+    /*Win-overlay*/
+    TDT4102::Color overlayColor(0, 0, 0, 128); 
+    TDT4102::Point overlayPosition {0,0};
+    const unsigned int winFontSize = 50;
+    double winAmount = 0;
+    TDT4102::Point bigWinPos {static_cast<int>((windowWidth/2)-(3.5*winFontSize)), static_cast<int>(windowHeight/2-4*winFontSize)};
+    TDT4102::Point winPos {static_cast<int>((windowWidth/2)-(2*winFontSize)), static_cast<int>(windowHeight/2-2*winFontSize)};
+    TDT4102::Point yippiPos {static_cast<int>((windowWidth/2)-(1.25*winFontSize)), static_cast<int>(windowHeight/2+2*winFontSize)};
 
 
-   /* Spilltilstand */
-   gameState = GameState::WaitingForBet;
-   auto lastUpdateTime = std::chrono::steady_clock::now();
+    /* Callback-funksjoner */
+    betButton.setCallback([this, &betSlider]() {
+        if (gameState != GameState::WaitingForBet) return;
+        currentPlayer->subMoney(betSlider.getValue());
+        deck = CardDeck();
+        deck.shuffle();
+        playerHand.clear();
+        dealerHand.clear();
+        playerImageHand.clear();
+        dealerImageHand.clear();   
+        gameState = GameState::PlayerFirstCard;
+    });
 
-   /* Callback-funksjoner */
-   spinButton.setCallback([this, &betSlider]() {
-       if (gameState != GameState::WaitingForBet) return;
-       currentPlayer->subMoney(betSlider.getValue());
-       deck = CardDeck();
-       deck.shuffle();
-       playerHand.clear();
-       dealerHand.clear();
-       playerImageHand.clear();
-       dealerImageHand.clear();   
-       gameState = GameState::PlayerFirstCard;
-   });
+    hitButton.setCallback([this]() { this->hit(); });
+    standButton.setCallback([this]() { this->stand(); });
 
-   hitButton.setCallback([this]() { this->hit(); });
-   standButton.setCallback([this]() { this->stand(); });
+    // Variabler som må huskes mellom frames
+    static bool dealerDoneDrawing = false;
+    static bool playerDone = false;
+    static bool waitingForNextCard = false;
+    static bool dealerIsDone = false;
 
-
+    static auto dealerDoneTime = std::chrono::steady_clock::now();
+    static auto playerDoneTime = std::chrono::steady_clock::now();
+    static auto lastDrawTime = std::chrono::steady_clock::now();
 
     while (!window->should_close()) {
         window->next_frame();
+
+        /*Input*/
+        bool mouseDown = window->is_left_mouse_button_down();
+        bool spaceKeyDown = window->is_key_down(KeyboardKey::SPACE);
 
         auto currentTime = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime).count() > 1000) {
@@ -206,43 +231,80 @@ void BlackJackGame::blackJack() {
                     std::cout << playerHand.size() << std::endl;
                     gameState = GameState::DealerFirstCard;
                     break;
+
                 case GameState::DealerFirstCard:
                     drawDealerCard();
                     std::cout << dealerHand << std::endl;
-
                     gameState = GameState::PlayerSecondCard;
                     break;
+
                 case GameState::PlayerSecondCard:
                     drawPlayerCard();
                     std::cout << playerHand << std::endl;
                     std::cout << playerHand.size() << std::endl;
                     gameState = GameState::DealerSecondCard;
                     break;
+
                 case GameState::DealerSecondCard:
                     drawDealerCard();
                     std::cout << dealerHand << std::endl;
                     gameState = GameState::GameInProgress;
                     break;
+
                 case GameState::GameInProgress:
-                    if (getHandScore(playerHand) >= 21) {
-                        gameState = GameState::ShowDealerHand;
-                    }
-                    break;
-                case GameState::ShowDealerHand:
-                    showDealerHand = true;
-                    if (getHandScore(dealerHand) < 17) {
-                        drawDealerCard();
-                        if (getHandScore(dealerHand) > 21) {
-                            break;
+                    if (!playerDone) {
+                        if (getHandScore(playerHand) > 21) {
+                            playerDone = true;
+                            playerDoneTime = std::chrono::steady_clock::now();
+                        } else if (getHandScore(playerHand) == 21) {
+                            gameState = GameState::ShowDealerHand;
+                        }
+                    } else {
+                        if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - playerDoneTime).count() > 2000) {
+                            std::cout << "switching to game over" << std::endl;
+                            playerDone = false;
+                            gameState = GameState::GameOver;
                         }
                     }
-                    gameState = GameState::GameOver;
                     break;
-                case GameState::GameOver:
 
-                    //win skjerm
-                    gameState = GameState::WaitingForBet;
+                case GameState::ShowDealerHand:
+                    showDealerHand = true;
+                    static auto delayStartTime = std::chrono::steady_clock::now();
+                
+                    if (!dealerIsDone) {
+                        if (!waitingForNextCard) {
+                            if (getHandScore(dealerHand) < 17) {
+                                drawDealerCard();
+                                std::cout << "Dealer drew. Score: " << getHandScore(dealerHand) << std::endl;
+                
+                                // Start 1s pause før neste kort
+                                waitingForNextCard = true;
+                                delayStartTime = std::chrono::steady_clock::now();
+                            } else {
+                                // Dealer er ferdig med å trekke
+                                dealerIsDone = true;
+                                delayStartTime = std::chrono::steady_clock::now(); // Start 2s pause før GameOver
+                            }
+                        } else {
+                            // Venter 1s mellom kort
+                            if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - delayStartTime).count() > 1000) {
+                                waitingForNextCard = false;
+                            }
+                        }
+                    } else {
+                        // Dealer er ferdig, vent 2s før GameOver
+                        if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - delayStartTime).count() > 2000) {
+                            gameState = GameState::GameOver;
+                            waitingForNextCard = false;
+                            dealerIsDone = false;
+                        }
+                    }
                     break;
+
+                case GameState::GameOver:
+                    break;
+
                 default:
                     break;
             }
@@ -252,7 +314,7 @@ void BlackJackGame::blackJack() {
         for (int i = 0; i < playerHand.size(); i++) {
             TDT4102::Point playerImagePosition{
                 static_cast<int>(windowWidth / 2 - imageWidth / 2 + (i * (imageWidth * 0.9))),
-                static_cast<int>(windowHeight - imageHeight * 1.5)};
+                static_cast<int>(windowHeight - imageHeight)};
             window->draw_image(playerImagePosition, *playerImageHand.at(i), imageWidth, imageHeight);
         }
 
@@ -261,16 +323,79 @@ void BlackJackGame::blackJack() {
             if (!dealerHand.empty()) {
                 TDT4102::Point dealerImagePosition{
                     static_cast<int>(windowWidth / 2 - imageWidth / 2),
-                    static_cast<int>(0 + imageHeight * 1.5)};
+                    static_cast<int>(0 + imageHeight / 3)};
                 window->draw_image(dealerImagePosition, *dealerImageHand.at(0), imageWidth, imageHeight);
             }
         } else {
             for (int i = 0; i < dealerHand.size(); i++) {
                 TDT4102::Point dealerImagePosition{
                     static_cast<int>(windowWidth / 2 - imageWidth / 2 + (i * (imageWidth * 0.9))),
-                    static_cast<int>(0 + imageHeight * 1.5)};
-
+                    static_cast<int>(0 + imageHeight / 3)};
                 window->draw_image(dealerImagePosition, *dealerImageHand.at(i), imageWidth, imageHeight);
+            }
+        }
+
+        if (gameState == GameState::GameOver) {
+            window->draw_rectangle(overlayPosition, windowWidth, windowHeight, overlayColor);
+            std::string result;
+            if (getHandScore(playerHand) > 21) {
+                //bust
+                result = "YOU BUSTED!";
+            } else if (getHandScore(dealerHand) > 21) {
+                //dealer bust
+                result = "THE DEALER BUSTED!";
+                window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);            
+                TDT4102::Point amountPos{static_cast<int>((windowWidth / 2) - (((currentPlayer->formatDouble(betSlider.getValue() * 1.5).length() * 0.375)) * winFontSize)), windowHeight / 2};
+                window->draw_text(amountPos, currentPlayer->formatDouble(betSlider.getValue() * 1.5), TDT4102::Color::black, static_cast<int>(winFontSize * 1.5));
+            } else if (getHandScore(playerHand) > getHandScore(dealerHand)) {
+                //win
+                result = "YOU WON!";
+                window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);            
+                TDT4102::Point amountPos{static_cast<int>((windowWidth / 2) - (((currentPlayer->formatDouble(betSlider.getValue() * 1.5).length() * 0.375)) * winFontSize)), windowHeight / 2};
+                window->draw_text(amountPos, currentPlayer->formatDouble(betSlider.getValue() * 1.5), TDT4102::Color::black, static_cast<int>(winFontSize * 1.5));
+            } else if (getHandScore(playerHand) < getHandScore(dealerHand)) {
+                //tap
+                result = "THE DEALER WON";
+            } else {
+                //push
+                result = "IT'S A TIE";
+                window->draw_text(winPos, "You've won your bet back!", TDT4102::Color::black, winFontSize);            
+            }
+            window->draw_text(bigWinPos, result, TDT4102::Color::black, winFontSize * 2);
+
+            if (mouseDown || spaceKeyDown) {
+                showDealerHand = false;
+                playerDone = false;
+                dealerDoneDrawing = false;
+                waitingForNextCard = false;
+                dealerIsDone = false;
+                gameState = GameState::WaitingForBet;
+            }
+        }
+
+        //Hånd verdi
+        if (!(gameState == GameState::WaitingForBet)) {
+            if (!playerHand.empty()) {
+                std::string playerScore = "You: " + std::to_string(getHandScore(playerHand));
+                window->draw_text(playerHandValue, playerScore, TDT4102::Color::black, valueFont);
+            } else {
+                std::cerr << "Player hand is empty!" << std::endl;
+            }
+
+            if (!showDealerHand) {
+                if (!dealerHand.empty()) {
+                    std::string dealerScore = "Dealer: " + std::to_string(getCardValue(dealerHand[0])) + "+ ??";
+                    window->draw_text(dealerHandValue, dealerScore, TDT4102::Color::black, valueFont);
+                } else {
+                    std::cerr << "Dealer hand is empty!" << std::endl;
+                }
+            } else {
+                if (!dealerHand.empty()) {
+                    std::string dealerScore = "Dealer: " + std::to_string(getHandScore(dealerHand));
+                    window->draw_text(dealerHandValue, dealerScore, TDT4102::Color::black, valueFont);
+                } else {
+                    std::cerr << "Dealer hand is empty!" << std::endl;
+                }
             }
         }
 
@@ -282,6 +407,7 @@ void BlackJackGame::blackJack() {
         std::string betString = std::to_string(betSlider.getValue());
         window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, TDT4102::Font::courier_bold_italic);
     }
+
 
     /*
     char playAgain;
