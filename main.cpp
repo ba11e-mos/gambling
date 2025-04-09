@@ -13,10 +13,14 @@ int main() {
    
   currentPlayer.registerUser("noa", 1000);
 
+  SlotsGame SlotsGame(&currentPlayer);
+  SlotsGame.slots();
+
+  /*
   BlackJackGame BlackJackGame(&currentPlayer);
   BlackJackGame.blackJack();
   
-  /*
+  
   login loginWindow(&currentPlayer);
 
   loginWindow.loginWindow();

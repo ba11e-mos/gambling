@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 #include <filesystem>
+#include <math.h>
 
 
 class SlotsGame{
@@ -22,8 +23,8 @@ class SlotsGame{
         TDT4102::Image** slotsImageMatrix;
         CardDeck cardDeck;
         Card card;
-        int rows = 3;
-        int columns = 5;
+        int rows = 4;
+        int columns = 7;
         bool spinning = true;
         bool win = false;
         int rowHeight;

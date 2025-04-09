@@ -122,61 +122,74 @@ void BlackJackGame::blackJack() {
     std::string spinLabel = "Bet";
     TDT4102::Button betButton {betPosition, betWidth, betHeight, spinLabel};
     betButton.setButtonColor(spinFill);
-    betButton.setLabelColor(TDT4102::Color::black);
+    betButton.setLabelColor(TDT4102::Color::white);
+    betButton.setButtonColor(TDT4102::Color::dark_red);
     window->add(betButton);
 
     /*Innsats slider*/
     const unsigned int betSliderHeight = 100;
     const unsigned int betSliderWidth = betWidth;
-    const unsigned int minBet = 1;
-    const unsigned int maxBet = 100;
-    const unsigned int startBet = 10;
-    const unsigned int step = 1;
+    const unsigned int minBet = 10;
+    const unsigned int maxBet = 1000;
+    const unsigned int startBet = 100;
+    const unsigned int step = 10;
     const unsigned int betFontSize =  30;
     const TDT4102::Point betSliderPosition {static_cast<int>(windowWidth-betSliderWidth*2), static_cast<int>(windowHeight-betHeight)};
     TDT4102::Slider betSlider {betSliderPosition, betWidth, betHeight, minBet, maxBet, startBet, step};
-    
+    int bet = 0;
     const TDT4102::Point betTextPosition {betSliderPosition.x-100, static_cast<int>(betSliderPosition.y+(betFontSize))};
     window->add(betSlider);
 
     /*Hit knapp*/
     const unsigned int hitWidth = static_cast<int>(windowWidth/12);
-    const unsigned int hitHeight = static_cast<int>(hitWidth/2);
-
-    TDT4102::Color hitFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point hitPosition {static_cast<int>(windowWidth/2-hitWidth*3), static_cast<int>(windowHeight-hitHeight*2)};
+    const unsigned int hitHeight = hitWidth;
+    TDT4102::Color seethroughColor(0, 0, 0, 96);
+    const TDT4102::Point hitPosition {static_cast<int>(windowWidth/3), static_cast<int>(windowHeight*(3.0/4) - hitHeight/2)};
     std::string hitLabel = "Hit";
     TDT4102::Button hitButton {hitPosition, hitWidth, hitHeight, hitLabel};
-    hitButton.setButtonColor(hitFill);
-    hitButton.setLabelColor(TDT4102::Color::black);
+    std::filesystem::path fileUCard = "assets";
+    fileUCard /= "spades-unknown.png";
+    TDT4102::Image unknownCard(fileUCard.string());
+    hitButton.setButtonColor(seethroughColor);
+    hitButton.setLabelColor(TDT4102::Color::white);
+    hitButton.setButtonColor(TDT4102::Color::transparent);
+    hitButton.setButtonColorHover(seethroughColor);
     window->add(hitButton);
+
+
 
     /*Stand knapp*/
     const unsigned int standWidth = static_cast<int>(windowWidth/12);
-    const unsigned int standHeight = static_cast<int>(standWidth/2);
-
-    TDT4102::Color standFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point standPosition {static_cast<int>(windowWidth/2-standWidth*4), static_cast<int>(windowHeight-standHeight*2)};
+    const unsigned int standHeight = standWidth;
+    const TDT4102::Point standPosition {static_cast<int>(windowWidth/3), static_cast<int>(windowHeight*(3.0/4)+ standHeight/2)};
     std::string standLabel = "Stand";
     TDT4102::Button standButton {standPosition, standWidth, standHeight, standLabel};
-    standButton.setButtonColor(standFill);
-    standButton.setLabelColor(TDT4102::Color::black);
+    std::filesystem::path fileCross = "assets";
+    fileCross /= "cross.png";
+    TDT4102::Image cross(fileCross.string());
+    standButton.setButtonColor(TDT4102::Color::transparent);
+    standButton.setLabelColor(TDT4102::Color::white);
+    standButton.setButtonColor(TDT4102::Color::transparent);
+    standButton.setButtonColorHover(seethroughColor);
     window->add(standButton);
 
 
+
     /*Bilder av kort*/
-    const unsigned int imageWidth = windowWidth/12;
+    const unsigned int imageWidth = static_cast<int>(windowWidth/14);
     const unsigned int imageHeight = static_cast<int>(imageWidth*1.5);
 
     /*Kortstokk*/
-    std::filesystem::path filePath = "assets";
-    filePath /= "card-back.png";
-    TDT4102::Image cardBack(filePath.string());
+    std::filesystem::path fileCardBack = "assets";
+    fileCardBack /= "card-back.png";
+    TDT4102::Image cardBack(fileCardBack.string());
 
     /*Hånd verdi*/
     int valueFont = 30;
     TDT4102::Point playerHandValue {static_cast<int>(windowWidth*(3.0/4)+valueFont),static_cast<int>(windowHeight/2+valueFont)};
     TDT4102::Point dealerHandValue {static_cast<int>(windowWidth*(3.0/4)+valueFont),static_cast<int>(windowHeight/2-valueFont)};
+    TDT4102::Font font = TDT4102::Font::pixeloid;
+
 
     /* Spilltilstand */
     gameState = GameState::WaitingForBet;
@@ -192,30 +205,50 @@ void BlackJackGame::blackJack() {
     TDT4102::Point yippiPos {static_cast<int>((windowWidth/2)-(1.25*winFontSize)), static_cast<int>(windowHeight/2+2*winFontSize)};
     int delayCounter = 0;
 
+    /*Bakgrunn*/
+    TDT4102::Color bgColor(0x00556b2f); 
+    TDT4102::Point bgPosition {0,0};
+    std::filesystem::path fileDecal = "assets";
+    fileDecal /= "blackJackTable.png";
+    TDT4102::Image decal(fileDecal.string());
+    static unsigned int decalWidth = static_cast<int>((windowWidth/3));
+    static unsigned int decalHeight = static_cast<int>((decalWidth/3.5));
+    TDT4102::Point decalPos {static_cast<int>((windowWidth/2)-(decalWidth/2)), static_cast<int>(windowHeight/2-decalHeight/2)};
+
     /*Opretting av kortstokk*/
     deck = CardDeck();
     deck.shuffle();
 
+    /*Kortsirkel*/
+    std::filesystem::path fileCircle = "assets";
+    fileCircle /= "circle.png";
+    TDT4102::Image circle(fileCircle.string());
+    static unsigned int circleWidth = static_cast<int>((windowWidth/6));
+    static unsigned int circleHeight = static_cast<int>((circleWidth));
+    TDT4102::Point cardCirclePos {static_cast<int>(windowWidth/2-circleWidth/2), static_cast<int>(windowHeight - circleHeight*1.25)};
+    
+
     /*Animering av korttrekkning*/
-    TDT4102::Point startPos{static_cast<int>(windowWidth*(1.0/4)-(imageWidth/3)),static_cast<int>(0+imageHeight/3)};
+    TDT4102::Point startPos{static_cast<int>(windowWidth*(7.0/8)+(imageWidth/3)),static_cast<int>(0+imageHeight/3)};
     TDT4102::Point playerEndPos{
-        static_cast<int>(windowWidth / 2 - imageWidth / 2),
-        static_cast<int>(windowHeight - imageHeight)};
+        static_cast<int>(windowWidth / 2 - circleWidth/2 + (imageWidth * 0.5)),
+        static_cast<int>(windowHeight - circleHeight*1.25)};
     TDT4102::Point dealerEndPos{
         static_cast<int>(windowWidth / 2 - imageWidth / 2),
         static_cast<int>(0 + imageHeight / 3)};
-    int playerChangeX = static_cast<int>((playerEndPos.x-startPos.x)/90);
-    int playerChangeY = static_cast<int>((playerEndPos.y-startPos.y)/90);
-    int dealerChangeX = static_cast<int>((dealerEndPos.x-startPos.x)/90);
-    int dealerChangeY = static_cast<int>((dealerEndPos.y-startPos.y)/90);
+    int playerChangeX = static_cast<int>((playerEndPos.x-startPos.x)/60);
+    int playerChangeY = static_cast<int>((playerEndPos.y-startPos.y)/60);
+    int dealerChangeX = static_cast<int>((dealerEndPos.x-startPos.x)/60);
+    int dealerChangeY = static_cast<int>((dealerEndPos.y-startPos.y)/60);
 
     int animatedCardX = startPos.x;
     int animatedCardY = startPos.y;
 
     /* Callback-funksjoner */
-    betButton.setCallback([this, &betSlider]() {
+    betButton.setCallback([this, &betSlider, &bet]() {
         if (gameState != GameState::WaitingForBet) return;
-        currentPlayer->subMoney(betSlider.getValue());
+        bet = betSlider.getValue();
+        currentPlayer->subMoney(bet);
 
         playerHand.clear();
         dealerHand.clear();
@@ -241,36 +274,55 @@ void BlackJackGame::blackJack() {
         /*Input*/
         bool mouseDown = window->is_left_mouse_button_down();
         bool spaceKeyDown = window->is_key_down(KeyboardKey::SPACE);
+        bool escDown = window->is_key_down(KeyboardKey::ESCAPE);
+
+        /*Bakgrunn*/
+        window->draw_rectangle(bgPosition, windowWidth, windowHeight, bgColor);
+        window->draw_image(decalPos, decal, decalWidth, decalHeight);
+        window->draw_image(cardCirclePos, circle, circleWidth, circleHeight);
+
+    
+        /*Kulere knapper*/
+        for (int i = 0; i < 2; i++) {
+            window->draw_image({static_cast<int>((hitPosition.x + hitWidth / 2) - (imageWidth / 8) + (i * (imageWidth/8) )), static_cast<int>((hitPosition.y + hitHeight / 2) - (imageHeight / 8))}, unknownCard, imageWidth/4, imageHeight/4);
+        }
+        window->draw_image({static_cast<int>(standPosition.x+(standWidth/4)), static_cast<int>(standPosition.y+(standHeight/4))}, cross, standWidth/2, standHeight/2);
+
 
     
         switch (gameState) {
             case GameState::PlayerFirstCard:
-                std::cout << "PFC" << std::endl;
+            std::cout << "PFC" << std::endl;
+
                 prevGameState = GameState::PlayerFirstCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::DealerFirstCard:
-                std::cout << "DFC" << std::endl;
+            std::cout << "DFC" << std::endl;
+
 
                 prevGameState = GameState::DealerFirstCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::PlayerSecondCard:
-                std::cout << "PSC" << std::endl;
+            std::cout << "PSC" << std::endl;
+
                 prevGameState = GameState::PlayerSecondCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::DealerSecondCard:
             std::cout << "DSC" << std::endl;
+
                 prevGameState = GameState::DealerSecondCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::GameInProgress:
             std::cout << "GIP" << std::endl;
+
                 if (getHandScore(playerHand) > 21) {
                     gameState = GameState::GameOver;
                 }
@@ -278,13 +330,13 @@ void BlackJackGame::blackJack() {
             case GameState::AnimatingCard:
                 std::cout << "AC" << std::endl;
                 if (prevGameState == GameState::PlayerFirstCard) {
-                    std::cout << "playerfirstcard" << std::endl;
+                    std::cout << "PFCAC" << std::endl;
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
                     animatedCardX += playerChangeX;
                     animatedCardY += playerChangeY;
                     
-                    if (animatedCardX > playerEndPos.x && animatedCardX > playerEndPos.y) {
+                    if (animatedCardX <= playerEndPos.x && animatedCardX >= playerEndPos.y) {
                         drawPlayerCard();
                         animatedCardX = startPos.x;
                         animatedCardY = startPos.y;
@@ -293,13 +345,14 @@ void BlackJackGame::blackJack() {
                     }
                     break;
                 } else if (prevGameState == GameState::DealerFirstCard) {
-                    std::cout << "dealerfirstcard" << std::endl;
+                    std::cout << "DFCAC" << std::endl;
+
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
                     animatedCardX += dealerChangeX;
                     animatedCardY += dealerChangeY;
                     
-                    if (animatedCardX > dealerEndPos.x && animatedCardX > dealerEndPos.y) {
+                    if (animatedCardX <= dealerEndPos.x && animatedCardY >= dealerEndPos.y) {
                         drawDealerCard();
                         animatedCardX = startPos.x;
                         animatedCardY = startPos.y;
@@ -309,13 +362,14 @@ void BlackJackGame::blackJack() {
                     break;
 
                 } else if (prevGameState == GameState::PlayerSecondCard) {
-                    std::cout << "playersecondcard" << std::endl;
+                    std::cout << "PSCAC" << std::endl;
+
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
                     animatedCardX += playerChangeX;
                     animatedCardY += playerChangeY;
                     
-                    if (animatedCardX > playerEndPos.x && animatedCardX > playerEndPos.y) {
+                    if (animatedCardX <= playerEndPos.x && animatedCardX >= playerEndPos.y) {
                         drawPlayerCard();
                         animatedCardX = startPos.x;
                         animatedCardY = startPos.y;
@@ -325,13 +379,14 @@ void BlackJackGame::blackJack() {
                     break;
 
                 } else if (prevGameState == GameState::DealerSecondCard) {
-                    std::cout << "dealersecondcard" << std::endl;
+                    std::cout << "DSCAC" << std::endl;
+
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
                     animatedCardX += dealerChangeX;
                     animatedCardY += dealerChangeY;
                     
-                    if (animatedCardX > dealerEndPos.x && animatedCardX > dealerEndPos.y) {
+                    if (animatedCardX <= dealerEndPos.x && animatedCardY >= dealerEndPos.y) {
                         drawDealerCard();
                         animatedCardX = startPos.x;
                         animatedCardY = startPos.y;
@@ -346,7 +401,7 @@ void BlackJackGame::blackJack() {
                     animatedCardX += playerChangeX;
                     animatedCardY += playerChangeY;
                     
-                    if (animatedCardX > playerEndPos.x && animatedCardX > playerEndPos.y) {
+                    if (animatedCardX <= playerEndPos.x && animatedCardX >= playerEndPos.y) {
                         drawPlayerCard();
                         animatedCardX = startPos.x;
                         animatedCardY = startPos.y;
@@ -361,7 +416,7 @@ void BlackJackGame::blackJack() {
                     animatedCardX += dealerChangeX;
                     animatedCardY += dealerChangeY;
                     
-                    if (animatedCardX > dealerEndPos.x && animatedCardX > dealerEndPos.y) {
+                    if (animatedCardX <= dealerEndPos.x && animatedCardY >= dealerEndPos.y) {
                         drawDealerCard();
                         animatedCardX = startPos.x;
                         animatedCardY = startPos.y;
@@ -373,7 +428,8 @@ void BlackJackGame::blackJack() {
                 }
 
             case GameState::ShowDealerHand:
-                std::cout << "SDH" << std::endl;
+            std::cout << "SDH" << std::endl;
+
                 if (delayCounter < 60) {
                     delayCounter += 1;
                     showDealerHand = true;
@@ -390,10 +446,11 @@ void BlackJackGame::blackJack() {
                     
                 break;
             case GameState::BlackJack:
+                //denne brukes ikke rn
                 if (delayCounter < 90) {
                     delayCounter += 1;
                     window->draw_rectangle(overlayPosition, windowWidth, windowHeight, overlayColor);
-                    window->draw_text(winPos, "BlackJack", TDT4102::Color::black, winFontSize);            
+                    window->draw_text(winPos, "BlackJack", TDT4102::Color::black, winFontSize, font);            
                     break;
                 } else {
                     delayCounter = 0;
@@ -404,7 +461,8 @@ void BlackJackGame::blackJack() {
                 break;
 
             case GameState::WaitingForBet:
-                std::cout << "WFB" << std::endl;
+            std::cout << "WFB" << std::endl;
+
 
             default:
                 break;
@@ -414,8 +472,8 @@ void BlackJackGame::blackJack() {
         //Spillerkort
         for (int i = 0; i < playerHand.size(); i++) {
             TDT4102::Point playerImagePosition{
-                static_cast<int>(windowWidth / 2 - imageWidth / 2 + (i * (imageWidth * 0.9))),
-                static_cast<int>(windowHeight - imageHeight)};
+                static_cast<int>(windowWidth / 2 - circleWidth/2 + (i * (imageWidth * 0.5))),
+                static_cast<int>(windowHeight - circleHeight*1.25)};
             window->draw_image(playerImagePosition, *playerImageHand.at(i), imageWidth, imageHeight);
         }
 
@@ -423,12 +481,12 @@ void BlackJackGame::blackJack() {
         if (!showDealerHand) {
             if (!dealerHand.empty()) {
                 TDT4102::Point dealerImagePosition{
-                    static_cast<int>(windowWidth / 2 - imageWidth / 2),
+                    static_cast<int>(windowWidth / 2 - circleWidth / 2),
                     static_cast<int>(0 + imageHeight / 3)};
                 window->draw_image(dealerImagePosition, *dealerImageHand.at(0), imageWidth, imageHeight);
                 if (dealerHand.size() == 2) {
                     TDT4102::Point dealerImagePosition{
-                        static_cast<int>(windowWidth / 2 - imageWidth / 2 + (1 * (imageWidth * 0.9))),
+                        static_cast<int>(windowWidth / 2 - circleWidth / 2 + (1 * (imageWidth * 0.5))),
                         static_cast<int>(0 + imageHeight / 3)};
                     window->draw_image(dealerImagePosition, cardBack, imageWidth, imageHeight);
 
@@ -437,7 +495,7 @@ void BlackJackGame::blackJack() {
         } else {
             for (int i = 0; i < dealerHand.size(); i++) {
                 TDT4102::Point dealerImagePosition{
-                    static_cast<int>(windowWidth / 2 - imageWidth / 2 + (i * (imageWidth * 0.9))),
+                    static_cast<int>(windowWidth / 2 - circleWidth / 2 + (i * (imageWidth * 0.5))),
                     static_cast<int>(0 + imageHeight / 3)};
                 window->draw_image(dealerImagePosition, *dealerImageHand.at(i), imageWidth, imageHeight);
             }
@@ -447,78 +505,108 @@ void BlackJackGame::blackJack() {
         if (!(gameState == GameState::WaitingForBet)) {
             if (!playerHand.empty()) {
                 std::string playerScore = "You: " + std::to_string(getHandScore(playerHand));
-                window->draw_text(playerHandValue, playerScore, TDT4102::Color::black, valueFont);
+                window->draw_text(playerHandValue, playerScore, TDT4102::Color::white, valueFont, font);
             } else {
                 //std::cerr << "Player hand is empty!" << std::endl;
             }
 
+            window->draw_line({static_cast<int>(dealerHandValue.x - (valueFont)), static_cast<int>(dealerHandValue.y + (playerHandValue.y-dealerHandValue.y)/2 + valueFont*0.6)}, {static_cast<int>(dealerHandValue.x + (valueFont * 9)), static_cast<int>(dealerHandValue.y + (playerHandValue.y-dealerHandValue.y)/2 + valueFont*0.6)}, TDT4102::Color::white);
+
             if (!showDealerHand) {
                 if (!dealerHand.empty()) {
-                    std::string dealerScore = "Dealer: " + std::to_string(getCardValue(dealerHand[0])) + "+ ??";
-                    window->draw_text(dealerHandValue, dealerScore, TDT4102::Color::black, valueFont);
+                    std::string dealerScore = "Dealer: " + std::to_string(getCardValue(dealerHand[0])) + " + ??";
+                    window->draw_text(dealerHandValue, dealerScore, TDT4102::Color::white, valueFont, font);
                 } else {
                     //std::cerr << "Dealer hand is empty!" << std::endl;
                 }
             } else {
                 if (!dealerHand.empty()) {
                     std::string dealerScore = "Dealer: " + std::to_string(getHandScore(dealerHand));
-                    window->draw_text(dealerHandValue, dealerScore, TDT4102::Color::black, valueFont);
+                    window->draw_text(dealerHandValue, dealerScore, TDT4102::Color::white, valueFont, font);
                 } else {
                     //std::cerr << "Dealer hand is empty!" << std::endl;
                 }
             }
         }
 
+        /*Kortstokk*/
         for (int i = 0; i < 3; i++) {
-            TDT4102::Point cardDeckPosition {static_cast<int>(windowWidth*(1.0/4)-(i*imageWidth/3)),static_cast<int>(0+imageHeight/3)};
+            TDT4102::Point cardDeckPosition {static_cast<int>(windowWidth*(7.0/8)+(i*imageWidth/3)),static_cast<int>(0+imageHeight/3)};
             window->draw_image(cardDeckPosition, cardBack, imageWidth, imageHeight);
         }
 
+        /*Win overlay*/
         if (gameState == GameState::GameOver) {
             if (delayCounter > 60) {
                 window->draw_rectangle(overlayPosition, windowWidth, windowHeight, overlayColor);
+        
                 std::string result;
                 if (getHandScore(playerHand) > 21) {
-                    //bust
+                    // Bust
                     result = "YOU BUSTED!";
                 } else if (getHandScore(dealerHand) > 21) {
-                    //dealer bust
+                    // Dealer bust
                     result = "THE DEALER BUSTED!";
-                    window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);            
-                    TDT4102::Point amountPos{static_cast<int>((windowWidth / 2) - (((currentPlayer->formatDouble(betSlider.getValue() * 1.5).length() * 0.375)) * winFontSize)), windowHeight / 2};
-                    window->draw_text(amountPos, currentPlayer->formatDouble(betSlider.getValue() * 1.5), TDT4102::Color::black, static_cast<int>(winFontSize * 1.5));
                 } else if (getHandScore(playerHand) > getHandScore(dealerHand)) {
-                    //win
-                    result = "YOU WON!";
-                    window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);            
-                    TDT4102::Point amountPos{static_cast<int>((windowWidth / 2) - (((currentPlayer->formatDouble(betSlider.getValue() * 1.5).length() * 0.375)) * winFontSize)), windowHeight / 2};
-                    window->draw_text(amountPos, currentPlayer->formatDouble(betSlider.getValue() * 1.5), TDT4102::Color::black, static_cast<int>(winFontSize * 1.5));
+                    // Win
+                    result = "WINNER WINNER, CHICKEN DINNER!";
                 } else if (getHandScore(playerHand) < getHandScore(dealerHand)) {
-                    //tap
+                    // Loss
                     result = "THE DEALER WON";
                 } else {
-                    //push
+                    // Push
                     result = "IT'S A TIE";
-                    window->draw_text(winPos, "You've won your bet back!", TDT4102::Color::black, winFontSize);            
                 }
-                window->draw_text(bigWinPos, result, TDT4102::Color::black, winFontSize * 2);
-                
+        
+                TDT4102::Point resultPos{
+                    static_cast<int>((windowWidth / 2) - (result.length() * winFontSize * 0.5)),
+                    static_cast<int>(windowHeight / 2 - winFontSize)
+                };
+        
+                window->draw_text(resultPos, result, TDT4102::Color::white, winFontSize * 2, font);
+        
+                if (result == "WINNER WINNER, CHICKEN DINNER!" || result == "THE DEALER BUSTED!") {
+                    std::string winText = "You Won: " + std::to_string(static_cast<int>(bet*1.5));
+                    TDT4102::Point winTextPos{
+                        static_cast<int>((windowWidth / 2) - ((winText.length()) * winFontSize * 0.375)),
+                        static_cast<int>(windowHeight / 2 + winFontSize)
+                    };
+
+                    
+                    window->draw_text(winTextPos, winText, TDT4102::Color::white, static_cast<int>(winFontSize * 1.5), font);
+                }
+        
                 if (mouseDown || spaceKeyDown) {
                     delayCounter = 0;
+                    currentPlayer->addMoney(bet * 1.5);
                     gameState = GameState::WaitingForBet;
+                    
+
                 }
             } else {
                 delayCounter += 1;
             }
         }
 
+        
+
         //Brukernavn, penger og innsats
         pointsString = currentPlayer->formatDouble(currentPlayer->getMoney());
-        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, TDT4102::Font::courier_bold_italic);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, font);
+        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, font);
 
         std::string betString = std::to_string(betSlider.getValue());
-        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, font);
+    
+        if (deck.cards.size() < 10) {
+            std::cout << "Stokker om kortstokken" << std::endl;
+            deck.resetDeck();
+            deck.shuffle();
+        }
+        
+        if (escDown) {
+            std::exit(EXIT_SUCCESS);
+        }
     }
 
 }
