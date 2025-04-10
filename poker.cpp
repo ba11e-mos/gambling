@@ -17,16 +17,28 @@ PokerGame::PokerGame(player* playerPtr, int botCount) : CurrentPlayer(playerPtr)
 
     }
 
+
     for (int i = 0; i < 2; i++){
-        for(auto& player : players){
+        for(player* player : players){
             player->hand.push_back(new Card (PokerDeck.drawCard()));
         }
     }
+
     
     /*loop for player hand images*/
     for (Card *card: players[0]->hand)
     {
         handImages.push_back(make_shared<TDT4102::Image>(card->cardFileName(*card)));
+    }
+
+    for(player* player : players ){
+        std::string tempName = player->getUsername();
+        std::cout << tempName << "'s cards: " << std::endl;
+        
+        for(int i=0; i < 2; i++){
+            std::cout <<player->hand[i]->toString() << std::endl;
+        }
+        
     }
     
 }
@@ -120,7 +132,7 @@ void PokerGame::Poker(){
     const int potWidth = betWidth;
     const int potHeight = betHeight;
     const TDT4102::Point potText {potPosition.x, potPosition.y-(potWidth/2+10)};
-    window->draw_text(potText, "pot", TDT4102::Color::black, FundFontSize, TDT4102::Font::courier_bold_italic);
+    window->draw_text(potText, "pot", TDT4102::Color::black, FundFontSize, TDT4102::Font::pixeloid);
 
 
     /*bet slider*/
@@ -137,6 +149,7 @@ void PokerGame::Poker(){
     window->add(betSlider);
 
     /*Callback functions*/
+    bool hasBetThisRound = false;
     betButton.setCallback([this, &betSlider](){
         if (!prevGameState == GameStateP::Betting) return;
         betRound(betSlider);
@@ -168,6 +181,7 @@ void PokerGame::Poker(){
 
     foldButton.setCallback([this](){
         CurrentPlayer->hasFolded = true;
+        gameState = GameStateP::Reset;
         std::cout << "you fold" << std::endl;
     });
 
@@ -180,14 +194,14 @@ void PokerGame::Poker(){
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
-        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, TDT4102::Font::pixeloid);
 
-        window->draw_text(namePosition, userName, TDT4102::Color::black, nameFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(namePosition, userName, TDT4102::Color::black, nameFontSize, TDT4102::Font::pixeloid);
 
         /*pot GUI, grass??*/
         std::string potString = std::to_string(*pot);
         window->draw_rectangle(potPosition, potWidth, potHeight, TDT4102::Color::floral_white, TDT4102::Color::black);
-        window->draw_text(potPosition, potString, TDT4102::Color::black, FundFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(potPosition, potString, TDT4102::Color::black, FundFontSize, TDT4102::Font::pixeloid);
         
 
         window->draw_rectangle(playSquarePosition, tableWidth, tableHeight, tableFill, tableEdge);
@@ -203,8 +217,8 @@ void PokerGame::Poker(){
 
         std::string pointsString = std::to_string(CurrentPlayer->getMoney());
 
-        window->draw_text(namePosition, userName, TDT4102::Color::black, nameFontSize, TDT4102::Font::courier_bold_italic);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, FundFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(namePosition, userName, TDT4102::Color::black, nameFontSize, TDT4102::Font::pixeloid);
+        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, FundFontSize, TDT4102::Font::pixeloid);
 
         /* maybe?
         if(CurrentPlayer->getMoney()<=0){
@@ -214,8 +228,9 @@ void PokerGame::Poker(){
 
     switch (gameState) {
         case GameStateP::Betting:
-            prevGameState = GameStateP::Betting;
-            break;
+
+        prevGameState = GameStateP::Betting;
+        break;
         
         case GameStateP::Flop:
             prevGameState = GameStateP::Flop;
@@ -229,6 +244,7 @@ void PokerGame::Poker(){
         case GameStateP::Turn:
             prevGameState = GameStateP::Turn;
 
+            
             if (table.size() == 3) dealCards();
             gameState = GameStateP::Betting;
 
@@ -250,9 +266,11 @@ void PokerGame::Poker(){
             break;
         
         case GameStateP::Reset:
+            hasBetThisRound = false;
             prevGameState = GameStateP::Reset;
 
             resetRound();
+            
             gameState = GameStateP::Betting;
             break;
         }
@@ -262,9 +280,9 @@ void PokerGame::Poker(){
 void PokerGame::betRound(const TDT4102::Slider& betSlider){
     const double minBet = 10.0;
     double amount = betSlider.getValue();
+    double betAmount = 0.0;
 
     for(auto& player : players){
-        double betAmount = 0.0;
 
         if(player == players[0]&& !CurrentPlayer->hasFolded){
             
@@ -272,19 +290,22 @@ void PokerGame::betRound(const TDT4102::Slider& betSlider){
             std::cout << "you bet: " << betAmount << std::endl;
         }
         else{
-            bool willPlay = botMakeMove();
-            if(willPlay){
-                betAmount = botMakeBet(player);
-            }
-            else{
-                std::cout << player->getUsername() << " folds" << std::endl;
-                player->hasFolded = true;
-                continue;
-            }
+            betAmount = botMakeBet(player);
+            std::cout << player->getUsername() << " bet: " << betAmount << std::endl;
         }
 
         *pot += betAmount;
         player->subMoney(betAmount);
+    }
+
+    int foldCount = 0;
+    for(auto& player : players){
+        if(player->hasFolded){
+            foldCount++;
+        }
+        if(foldCount== players.size()-1){
+            gameState = GameStateP::Showdown;
+        }
     }
     
 }
@@ -297,22 +318,32 @@ std::vector<Card*> PokerGame::getAllCards(player* player, const std::vector<Card
 
 
 bool PokerGame::botMakeMove(){
+    /*
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 1); 
     return dis(gen);
+    */
+   return true;
 }
 
 double PokerGame::botMakeBet(player* bot){
     const double chipValues[4] = {10.0, 20.0, 50.0, 100.0};
-
     srand(time(nullptr));
 
     int randomChip = rand()% size(chipValues);
-    double bet = chipValues[randomChip];
-    if (bot->getMoney() < bet){ return bot->getMoney();}
-    return bet;
-    
+    //if(!bot->hasFolded){
+        double bet = chipValues[randomChip];
+        if (bot->getMoney() < bet){ return bot->getMoney();}
+        std::cout << bot->getUsername() << " bet: " << bet << std::endl;
+        return bet;
+    //}
+
+    /*
+    else{
+        return bet;
+    }
+    */
 }
 
 
@@ -346,11 +377,12 @@ void PokerGame::resetRound(){
     flop = false;
 
     PokerDeck.resetDeck();
+    PokerDeck.shuffle();
 
     *pot = 0;
 
     for (player* p : players) {
-        for (Card* c : p->hand) delete c;
+        //for (Card* c : p->hand) delete c;
         p->hand.clear();
         p->hasFolded = false;
 
@@ -476,20 +508,26 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
 
 void PokerGame::evaluateHands(){
     std::vector<EvaluatedHand> results;
+
     for(player* player : players){
         if(!player->hasFolded){
             results.push_back(evaluatePlayerHand(player));
         }
     }
 
+    if (results.empty()) {
+        std::cout << "No players left in the round. Nobody wins." << std::endl;
+        gameState = GameStateP::Reset;
+        return;
+    }
+
     std::sort(results.begin(), results.end(), [](const EvaluatedHand& a, const EvaluatedHand& b){
         if(a.rank != b.rank) {return a.rank > b.rank;}
         return a.rankedValues > b.rankedValues;
-
     });
 
-    /*winner values*/
     player* winner = results.front().playerPtr;
     std::string winnerName = winner->getUsername();
+    std::cout << "The winner is: " << winnerName << std::endl;
     winner->addMoney(*pot);  
 }
