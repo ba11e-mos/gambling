@@ -3,11 +3,16 @@
 #include <string>
 #include "AnimationWindow.h"
 #include "slots.h"
+#include "poker.h"
 #include "widgets/Button.h"
 #include "player.h"
 #include "Blackjack.h"
 
 int chooseGame(player* currentPlayer);
 void playSlots(player* currentPlayer);
+
+void PlayPoker(player* currentPlayer);
+
 void playBlackJack(player* currentPlayer);
- extern TDT4102::AnimationWindow* choiceWindow;
+extern TDT4102::AnimationWindow* choiceWindow;
+

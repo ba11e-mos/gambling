@@ -8,7 +8,6 @@
 #include "widgets/Slider.h"
 #include "CardDeck.h"
 #include <vector>
-#include <algorithm>
 #include <filesystem>
 #include <math.h>
 

@@ -1,8 +1,11 @@
 #pragma once
 #include <string>
+#include <vector>
+#include "CardDeck.h"
 #include "iostream"
 #include "fstream"
 #include <iomanip>
+
 
 class player {
     private:
@@ -19,5 +22,10 @@ class player {
         void subMoney(double amount);
         void addMoney(double amount);
         void saveMoney();
+
+        std::vector<Card*> hand;
+        bool hasFolded = false;
+
         std::string formatDouble(double value);
+
 };
