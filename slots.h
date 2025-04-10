@@ -9,6 +9,7 @@
 #include "CardDeck.h"
 #include <vector>
 #include <filesystem>
+#include <math.h>
 
 
 class SlotsGame{
@@ -21,8 +22,8 @@ class SlotsGame{
         TDT4102::Image** slotsImageMatrix;
         CardDeck cardDeck;
         Card card;
-        int rows = 3;
-        int columns = 5;
+        int rows = 4;
+        int columns = 7;
         bool spinning = true;
         bool win = false;
         int rowHeight;
@@ -35,6 +36,5 @@ class SlotsGame{
         friend std::ostream& operator<<(std::ostream& os, const SlotsGame& game);
 
         double calculateMult();
-        std::string formatDouble(double value);
 };
 

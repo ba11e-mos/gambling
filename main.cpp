@@ -20,6 +20,9 @@ int main() {
   SlotsGame SlotsGame(&currentPlayer);
   SlotsGame.slots();
 
+  /*
+  BlackJackGame BlackJackGame(&currentPlayer);
+  BlackJackGame.blackJack();
 
   login loginWindow(&currentPlayer);
 

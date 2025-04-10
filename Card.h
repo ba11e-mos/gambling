@@ -67,3 +67,6 @@ class Card {
 		std::string toString() const;
 		std::string cardFileName(Card card);
 };
+
+
+std::ostream& operator<<(std::ostream& os, const Card& card);

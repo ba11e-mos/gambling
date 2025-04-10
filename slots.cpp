@@ -33,10 +33,45 @@ SlotsGame::~SlotsGame() {
 
 void SlotsGame::slots() {
     std::string windowTitle = "Gambling++";
-    const unsigned int windowHeight = 1080;
-    const unsigned int windowWidth = 1280;
-    window = new TDT4102::AnimationWindow(300, 10, windowWidth, windowHeight, windowTitle);
+    window = new TDT4102::AnimationWindow(0, 0, 800, 600, windowTitle);
 
+    const int logicalWidth = 1920;
+    const int logicalHeight = 1080;
+
+    SDL_Rect displayBounds;
+    float ddpi, hdpi, vdpi;
+    if (SDL_GetDisplayBounds(0, &displayBounds) != 0) {
+        std::cerr << "Failed to get display bounds: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    if (SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) != 0) {
+        std::cerr << "Failed to get display DPI: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    const float standardDPI = 96.0f;
+
+    float scaleFactor = 1;//(hdpi / standardDPI);
+
+    std::cout << displayBounds.w << "x" << displayBounds.h << std::endl;
+    std::cout << scaleFactor << std::endl;
+
+
+    int windowWidth = static_cast<int>(displayBounds.w/(scaleFactor));
+    int windowHeight = static_cast<int>(displayBounds.h/(scaleFactor));
+
+    SDL_Window* sdlWindow = window->getWindowHandle();
+    if (!sdlWindow) {
+        std::cerr << "Failed to get SDL window handle." << std::endl;
+        return;
+    }
+
+    if (SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
+        std::cerr << "Failed to set fullscreen mode: " << SDL_GetError() << std::endl;
+        return;
+    }
+    std::cout << windowWidth << "x" << windowHeight << std::endl;
 
     /*Brukernavn*/
     std::string username = currentPlayer->getUsername();
@@ -46,20 +81,22 @@ void SlotsGame::slots() {
 
     /*Poeng*/
     int pointsFontSize = 20;
+    TDT4102::Font font = TDT4102::Font::pixeloid;
     std::string pointsString = std::to_string(currentPlayer->getMoney());
     int pointsLenght = pointsString.length()*pointsFontSize*0.6;
     const TDT4102::Point pointsPosition {static_cast<int>(windowWidth)-static_cast<int>(10+pointsLenght), 10};
 
     /*Spillvindu*/
-    const unsigned int playSquareWidth = windowWidth-300;
-    const unsigned int playSquareHeight = static_cast<int>(playSquareWidth*0.85);
+    const unsigned int playSquareHeight = windowHeight-200;
+    const unsigned int playSquareWidth = static_cast<int>(playSquareHeight*(7.0/6));
+    
     TDT4102::Color playSquareFill = TDT4102::Color::white;
     TDT4102::Color playSquareEdge = TDT4102::Color::black;
-    const TDT4102::Point playSquarePosition {150, 50};
+    const TDT4102::Point playSquarePosition {static_cast<int>(windowWidth/2 - playSquareWidth/2), 50};
 
 
     /*Slots matrise*/
-    const unsigned int imageWidth = (playSquareWidth-100)/5;
+    const unsigned int imageWidth = (playSquareWidth-100)/columns;
     const unsigned int imageHeight = static_cast<int>(imageWidth*1.5);
     int rowHeight = imageHeight+10;
     int columnWidth = imageWidth+10;
@@ -68,11 +105,12 @@ void SlotsGame::slots() {
     
 
     /*Spinneknapp*/
-    const unsigned int spinWidth = static_cast<int>(windowWidth/6);
-    const unsigned int spinHeight = static_cast<int>(spinWidth/2);
+    const unsigned int spinHeight = static_cast<int>((windowHeight-playSquareHeight-playSquarePosition.y)/2);
+    const unsigned int spinWidth = static_cast<int>(spinHeight*2);
+    
     
     TDT4102::Color spinFill = TDT4102::Color::light_sky_blue;
-    const TDT4102::Point spinPosition {windowWidth/2-spinWidth/2, static_cast<int>(playSquareHeight+50+spinHeight/2)};
+    const TDT4102::Point spinPosition {static_cast<int>(windowWidth/2-spinWidth/2), static_cast<int>((playSquarePosition.y+playSquareHeight)+spinHeight/2)};
     std::string spinLabel = "Spinn!";
     TDT4102::Button spinButton {spinPosition, spinWidth, spinHeight, spinLabel};
     spinButton.setButtonColor(spinFill);
@@ -88,11 +126,15 @@ void SlotsGame::slots() {
     const unsigned int startBet = 10;
     const unsigned int step = 1;
     const unsigned int betFontSize =  30;
-    const TDT4102::Point betPosition {windowWidth-betWidth*2, static_cast<int>(playSquareHeight+betHeight)};
+    const TDT4102::Point betPosition {static_cast<int>(windowWidth-betWidth*2), static_cast<int>(playSquareHeight+betHeight)};
     TDT4102::Slider betSlider {betPosition, betWidth, betHeight, minBet, maxBet, startBet, step};
     
-    const TDT4102::Point betTextPosition {windowWidth-betWidth*2-50, static_cast<int>(playSquareHeight+betHeight+betFontSize*0.85)};
+    const TDT4102::Point betTextPosition {static_cast<int>(windowWidth-betWidth*2-50), static_cast<int>(playSquareHeight+betHeight+betFontSize*0.85)};
     window->add(betSlider);
+
+    /*Bakgrunn*/
+    TDT4102::Color bgColor(0x00556b2f); 
+    TDT4102::Point bgPosition {0,0};
 
 
     /*Win-overlay*/
@@ -101,11 +143,11 @@ void SlotsGame::slots() {
     const unsigned int winFontSize = 50;
     double winAmount = 0;
     bool jackpot = false;
-    TDT4102::Point bigWinPos {static_cast<int>((windowWidth/2)-(3.5*winFontSize)), windowHeight/2-4*winFontSize};
-    TDT4102::Point winPos {static_cast<int>((windowWidth/2)-(2*winFontSize)), windowHeight/2-2*winFontSize};
-    TDT4102::Point yippiPos {static_cast<int>((windowWidth/2)-(1.25*winFontSize)), windowHeight/2+2*winFontSize};
+    TDT4102::Point bigWinPos {static_cast<int>((windowWidth/2)-(3.5*winFontSize)), static_cast<int>(windowHeight/2-4*winFontSize)};
+    TDT4102::Point winPos {static_cast<int>((windowWidth/2)-(2*winFontSize)), static_cast<int>(windowHeight/2-2*winFontSize)};
+    TDT4102::Point yippiPos {static_cast<int>((windowWidth/2)-(1.25*winFontSize)), static_cast<int>(windowHeight/2+2*winFontSize)};
 
-    TDT4102::Point winTextPos {(windowWidth/2)-200, playSquareHeight+50};
+    TDT4102::Point winTextPos {static_cast<int>((windowWidth/2)-200), static_cast<int>(playSquareHeight+50)};
 
     
 
@@ -125,6 +167,8 @@ void SlotsGame::slots() {
         /*Input*/
         bool mouseDown = window->is_left_mouse_button_down();
         bool spaceKeyDown = window->is_key_down(KeyboardKey::SPACE);
+        bool escDown = window->is_key_down(KeyboardKey::ESCAPE);
+
         if (!spinning and !jackpot) {
             if (spaceKeyDown) {
                 spin(betSlider);
@@ -133,19 +177,20 @@ void SlotsGame::slots() {
             } 
         }
         
-
+        //Bakgrunn (ikke i bruk rn)
+        //window->draw_rectangle(bgPosition, windowWidth, windowHeight, bgColor);
 
         //pengeverdi oppdatering
-        std::string pointsString = formatDouble(currentPlayer->getMoney());
+        std::string pointsString = currentPlayer->formatDouble(currentPlayer->getMoney());
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
-        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, font);
 
 
         //brukernavn og penger på skjerm
-        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, TDT4102::Font::courier_bold_italic);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, TDT4102::Font::courier_bold_italic);
+        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, font);
+        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, font);
         
         //spillvindu
         window->draw_rectangle(playSquarePosition, playSquareWidth, playSquareHeight, playSquareFill, playSquareEdge);
@@ -159,7 +204,7 @@ void SlotsGame::slots() {
         //Slots matrise
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < columns; col++) {
-                TDT4102::Point imagePosition{175+(col*columnWidth), imageYPos+(row*rowHeight)};
+                TDT4102::Point imagePosition{static_cast<int>((playSquarePosition.x+25)+(col*columnWidth)), imageYPos+(row*rowHeight)};
                 window->draw_image(imagePosition, slotsImageMatrix[row][col], imageWidth, imageHeight);
 
             }
@@ -172,13 +217,13 @@ void SlotsGame::slots() {
                 jackpot = true;
                 window->draw_rectangle(overlayPosition, windowWidth, windowHeight, overlayColor);
                 
-                window->draw_text(bigWinPos, "BIG WIN", TDT4102::Color::black, winFontSize*2);
-                window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize);
+                window->draw_text(bigWinPos, "BIG WIN", TDT4102::Color::black, winFontSize*2, font);
+                window->draw_text(winPos, "You Won:", TDT4102::Color::black, winFontSize, font);
 
-                TDT4102::Point amountPos {static_cast<int>((windowWidth/2)-(((formatDouble(winAmount).length()*0.375))*winFontSize)), windowHeight/2};
+                TDT4102::Point amountPos {static_cast<int>((windowWidth/2)-(((currentPlayer->formatDouble(winAmount).length()*0.375))*winFontSize)), windowHeight/2};
 
-                window->draw_text(amountPos, formatDouble(winAmount), TDT4102::Color::black, static_cast<int>(winFontSize*1.5));
-                window->draw_text(yippiPos, "Yippi!", TDT4102::Color::black, winFontSize);
+                window->draw_text(amountPos, currentPlayer->formatDouble(winAmount), TDT4102::Color::black, static_cast<int>(winFontSize*1.5), font);
+                window->draw_text(yippiPos, "Yippi!", TDT4102::Color::black, winFontSize, font);
 
                 winAmount += 0.1;
                 
@@ -192,10 +237,13 @@ void SlotsGame::slots() {
                 }  
                 
             } else {
-                std::string winText = "You won " + formatDouble(winTotal) + "!!!";
-                window->draw_text(winTextPos, winText);
+                std::string winText = "You won " + currentPlayer->formatDouble(winTotal) + "!!!";
+                window->draw_text(winTextPos, winText, TDT4102::Color::black, 20, font);
             }
             
+        }
+        if (escDown) {
+            std::exit(EXIT_SUCCESS);
         }
     }
 }
@@ -272,21 +320,15 @@ double SlotsGame::calculateMult(){
         }
     }
 
-
+    //std::cout << hearts << " " << spades << " " << clubs << " " << diamonds << std::endl;
     std::vector<int> suitCount = {hearts, spades, clubs, diamonds};
 
     for (int count : suitCount) {
-        if (count >= 6) {
-            mult += 1 + (count - 6) * 0.5;
+        if (count >= 9) {
+            mult += std::pow(2, count - 9);
         }
     }
 
     return mult;
 }
 
-/*Formatering av double til string med to desimaler*/
-std::string SlotsGame::formatDouble(double value) {
-    std::ostringstream stream;
-    stream << std::fixed << std::setprecision(2) << value;
-    return stream.str();
-}

@@ -39,6 +39,11 @@ std::string rankToString(Rank rank) {
     return it->second;
 }
 
+std::ostream& operator<<(std::ostream& os, const Card& card) {
+    os << card.toString();
+    return os;
+}
+
 std::string Card::cardFileName(Card card) {
     std::string suit = suitToString(card.getSuit());
     std::string rank = rankToString(card.getRank());
