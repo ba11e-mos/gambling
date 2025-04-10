@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include "AnimationWindow.h"
 #include "slots.h"
@@ -8,3 +10,4 @@
 int chooseGame(player* currentPlayer);
 void playSlots(player* currentPlayer);
 void playBlackJack(player* currentPlayer);
+ extern TDT4102::AnimationWindow* choiceWindow;
