@@ -212,7 +212,7 @@ void SlotsGame::slots() {
                 window->draw_text(amountPos, currentPlayer->formatDouble(winAmount), TDT4102::Color::black, static_cast<int>(winFontSize*1.5), font);
                 window->draw_text(yippiPos, "Yippi!", TDT4102::Color::black, winFontSize, font);
 
-                winAmount += 0.1;
+                winAmount += 1;
                 
                 if (winAmount >= winTotal) {
                     winAmount = winTotal;
@@ -311,8 +311,8 @@ double SlotsGame::calculateMult(){
     std::vector<int> suitCount = {hearts, spades, clubs, diamonds};
 
     for (int count : suitCount) {
-        if (count >= 9) {
-            mult += std::pow(2, count - 9);
+        if (count >= 10) {
+            mult += std::pow(2, count - 10);
         }
     }
 
