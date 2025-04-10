@@ -1,3 +1,5 @@
+#pragma once;
+
 #include "AnimationWindow.h"
 #include "widgets/TextInput.h"
 #include "player.h"

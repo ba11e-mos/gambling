@@ -21,6 +21,7 @@ int chooseGame(player* currentPlayer) {
     /*Slots*/
     const unsigned int buttonWidth = windowWidth/3;
     const unsigned int buttonHeight = windowHeight/7;
+
     const TDT4102::Point slotsButtonPosition {static_cast<int>((windowWidth / 2) - (buttonWidth / 2)),static_cast<int>((windowHeight / 2) + buttonHeight)};    
     const std::string slotsButtonLabel = "Slots";
     TDT4102::Button slotsButton {slotsButtonPosition, buttonWidth, buttonHeight, slotsButtonLabel};
@@ -28,6 +29,11 @@ int chooseGame(player* currentPlayer) {
     slotsButton.setCallback([currentPlayer]() { playSlots(currentPlayer); });
 
     /*Poker*/
+    const std::string PokerButtonLabel = "Poker";
+    const TDT4102::Point PokerButtonPos {static_cast<int>((windowWidth / 2) - (buttonWidth / 2)), static_cast<int>(windowHeight / 2)};
+    TDT4102::Button PokerButton {PokerButtonPos, buttonWidth, buttonHeight, PokerButtonLabel};
+    window.add(PokerButton);
+    PokerButton.setCallback([currentPlayer]() { PlayPoker(currentPlayer); } );
 
     /*Blackjack*/
     const TDT4102::Point BJButtonPosition {static_cast<int>((windowWidth / 2) - (buttonWidth / 2)),static_cast<int>((windowHeight / 2) - buttonHeight)};    
@@ -57,4 +63,9 @@ void playBlackJack(player* currentPlayer){
     BlackJackGame.blackJack();
     std::cout << "BJ ferdig" << std::endl;
     return;
+}
+
+void PlayPoker(player* currentPlayer){
+    PokerGame PokerGame(currentPlayer, 1);
+    PokerGame.Poker();
 }
