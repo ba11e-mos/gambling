@@ -32,7 +32,7 @@ int chooseGame(player* currentPlayer) {
     const std::string PokerButtonLabel = "Poker";
     const TDT4102::Point PokerButtonPos {static_cast<int>((windowWidth / 2) - (buttonWidth / 2)), static_cast<int>(windowHeight / 2)};
     TDT4102::Button PokerButton {PokerButtonPos, buttonWidth, buttonHeight, PokerButtonLabel};
-    window.add(PokerButton);
+    choiceWindow->add(PokerButton);
     PokerButton.setCallback([currentPlayer]() { PlayPoker(currentPlayer); } );
 
     /*Blackjack*/

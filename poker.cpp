@@ -107,6 +107,14 @@ void PokerGame::Poker(){
     foldButton.setLabelColor(TDT4102::Color::black);
     window->add(foldButton);
 
+    /*stand button*/
+    const TDT4102::Point standPosition {foldPosition.x, static_cast<int>(foldPosition.y-betHeight*1.5)};
+    std::string standLabel = "stand";
+    TDT4102::Button standButton {standPosition, betWidth, betHeight, standLabel};
+    standButton.setButtonColor(betFill);
+    standButton.setLabelColor(TDT4102::Color::black);
+    window->add(standButton);
+
     /*pot GUI, grass??*/
     const TDT4102::Point potPosition {playSquarePosition.x, playSquarePosition.y-(imageHeight/2+betHeight)};
     const int potWidth = betWidth;
@@ -130,7 +138,32 @@ void PokerGame::Poker(){
 
     /*Callback functions*/
     betButton.setCallback([this, &betSlider](){
+        if (!prevGameState == GameStateP::Betting) return;
         betRound(betSlider);
+        if (!flop) {
+            gameState = GameStateP::Flop;
+        } else  if (table.size() == 3) {
+            gameState = GameStateP::Turn;
+        } else if (table.size() == 4) {
+            gameState = GameStateP::River;
+        } else if (table.size() == 5) {
+            gameState = GameStateP::Showdown;
+        }
+    });
+
+
+    standButton.setCallback([this, &betSlider](){
+        if (!prevGameState == GameStateP::Betting) return;
+        if (!flop) {
+            return;
+        } else  if (table.size() == 3) {
+            gameState = GameStateP::Turn;
+        } else if (table.size() == 4) {
+            gameState = GameStateP::River;
+        } else if (table.size() == 5) {
+            gameState = GameStateP::Showdown;
+        }
+        
     });
 
     foldButton.setCallback([this](){
@@ -180,38 +213,47 @@ void PokerGame::Poker(){
         */  
 
     switch (gameState) {
-        case GameState::Preflop:
-        
-        
-        case GameState::Betting:
+        case GameStateP::Betting:
+            prevGameState = GameStateP::Betting;
             break;
         
-        case GameState::Flop:
+        case GameStateP::Flop:
+            prevGameState = GameStateP::Flop;
+
+
             if (!flop) dealCards();
 
-            gameState = GameState::Betting;
+            gameState = GameStateP::Betting;
             break;
         
-        case GameState::Turn:
+        case GameStateP::Turn:
+            prevGameState = GameStateP::Turn;
+
             if (table.size() == 3) dealCards();
-            gameState = GameState::Betting;
+            gameState = GameStateP::Betting;
 
             break;
         
-        case GameState::River:
+        case GameStateP::River:
+            prevGameState = GameStateP::River;
+
             if (table.size() == 4) dealCards();
-            gameState = GameState::Betting;
+            gameState = GameStateP::Betting;
             break;
         
-        case GameState::Showdown:
+        case GameStateP::Showdown:
+            prevGameState = GameStateP::Showdown;
+
             evaluateHands();
             std::cout << "Round over! Winner has been paid out." << std::endl;
-            gameState = GameState::Reset;
+            gameState = GameStateP::Reset;
             break;
         
-        case GameState::Reset:
+        case GameStateP::Reset:
+            prevGameState = GameStateP::Reset;
+
             resetRound();
-            gameState = Preflop;
+            gameState = GameStateP::Betting;
             break;
         }
     }
@@ -288,9 +330,11 @@ void PokerGame::dealCards(){
         PokerDeck.drawCard();
         Card drawnCard = PokerDeck.drawCard();
         table.push_back(new Card (drawnCard));
+        tableImages.push_back(std::make_shared<TDT4102::Image>(drawnCard.cardFileName(drawnCard)));
+
     }
     
-    this->gameState = GameState::Betting;
+    this->gameState = GameStateP::Betting;
     
 }
 

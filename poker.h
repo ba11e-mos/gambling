@@ -22,9 +22,8 @@ enum class HandRank {
     StraightFlush
 };
 
-enum GameState {
-    Preflop = 0,
-    Betting,
+enum GameStateP {
+    Betting = 0,
     Flop,
     Turn,
     River,
@@ -54,7 +53,9 @@ private:
     std::vector<Card*> table;
     double* pot;
     bool roundInProgress;
-    int gameState = 0;
+    GameStateP gameState;
+    GameStateP prevGameState;
+
     
     // GUI
     TDT4102::AnimationWindow* window;
