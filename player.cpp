@@ -7,6 +7,10 @@ player::player() : username(new std::string("")), money(new double(0.0)) {}
 player::~player() {
     delete username;
     delete money;
+    for (auto cardPtr : hand) {
+        delete cardPtr;
+    }
+    hand.clear();
 }
 
 void player::registerUser(const std::string& newUsername, int startingMoney) {
