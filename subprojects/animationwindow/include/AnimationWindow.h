@@ -133,6 +133,7 @@ class AnimationWindow {
     float get_delta_mouse_wheel() const;
 
     SDL_Window* getWindowHandle();
+    SDL_Renderer* getRendererHandle();
  
 
 };

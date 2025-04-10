@@ -63,31 +63,14 @@ void BlackJackGame::blackJack() {
     std::string windowTitle = "Gambling++";
     window = new TDT4102::AnimationWindow(0, 0, 800, 600, windowTitle);
 
-    const int logicalWidth = 1920;
-    const int logicalHeight = 1080;
+    #ifdef _WIN32
+        SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+    #endif
 
-    SDL_Rect displayBounds;
-    float ddpi, hdpi, vdpi;
-    if (SDL_GetDisplayBounds(0, &displayBounds) != 0) {
-        std::cerr << "Failed to get display bounds: " << SDL_GetError() << std::endl;
-        return;
-    }
-
-    if (SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) != 0) {
-        std::cerr << "Failed to get display DPI: " << SDL_GetError() << std::endl;
-        return;
-    }
-
-    const float standardDPI = 96.0f;
-
-    float scaleFactor = 1;//(hdpi / standardDPI);
-
-    std::cout << displayBounds.w << "x" << displayBounds.h << std::endl;
-    std::cout << scaleFactor << std::endl;
-
-
-    int windowWidth = static_cast<int>(displayBounds.w/(scaleFactor));
-    int windowHeight = static_cast<int>(displayBounds.h/(scaleFactor));
+    #ifdef __linux__
+        SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
+        setenv("SDL_VIDEO_X11_SCALING", "1", 1);
+    #endif
 
     SDL_Window* sdlWindow = window->getWindowHandle();
     if (!sdlWindow) {
@@ -99,7 +82,11 @@ void BlackJackGame::blackJack() {
         std::cerr << "Failed to set fullscreen mode: " << SDL_GetError() << std::endl;
         return;
     }
-    std::cout << windowWidth << "x" << windowHeight << std::endl;
+
+    int windowWidth, windowHeight;
+    SDL_GetRendererOutputSize(window->getRendererHandle(), &windowWidth, &windowHeight);
+
+    std::cout << "Vindusstørrelse: " << windowWidth << "x" << windowHeight << std::endl;
 
     /*Brukernavn*/
     std::string username = currentPlayer->getUsername();
@@ -292,14 +279,12 @@ void BlackJackGame::blackJack() {
     
         switch (gameState) {
             case GameState::PlayerFirstCard:
-            std::cout << "PFC" << std::endl;
 
                 prevGameState = GameState::PlayerFirstCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::DealerFirstCard:
-            std::cout << "DFC" << std::endl;
 
 
                 prevGameState = GameState::DealerFirstCard;
@@ -307,30 +292,25 @@ void BlackJackGame::blackJack() {
                 break;
 
             case GameState::PlayerSecondCard:
-            std::cout << "PSC" << std::endl;
 
                 prevGameState = GameState::PlayerSecondCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::DealerSecondCard:
-            std::cout << "DSC" << std::endl;
 
                 prevGameState = GameState::DealerSecondCard;
                 gameState = GameState::AnimatingCard;
                 break;
 
             case GameState::GameInProgress:
-            std::cout << "GIP" << std::endl;
 
                 if (getHandScore(playerHand) > 21) {
                     gameState = GameState::GameOver;
                 }
                 break;
             case GameState::AnimatingCard:
-                std::cout << "AC" << std::endl;
                 if (prevGameState == GameState::PlayerFirstCard) {
-                    std::cout << "PFCAC" << std::endl;
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
                     animatedCardX += playerChangeX;
@@ -345,7 +325,6 @@ void BlackJackGame::blackJack() {
                     }
                     break;
                 } else if (prevGameState == GameState::DealerFirstCard) {
-                    std::cout << "DFCAC" << std::endl;
 
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
@@ -362,7 +341,6 @@ void BlackJackGame::blackJack() {
                     break;
 
                 } else if (prevGameState == GameState::PlayerSecondCard) {
-                    std::cout << "PSCAC" << std::endl;
 
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
@@ -379,7 +357,6 @@ void BlackJackGame::blackJack() {
                     break;
 
                 } else if (prevGameState == GameState::DealerSecondCard) {
-                    std::cout << "DSCAC" << std::endl;
 
                     TDT4102::Point animationPos{animatedCardX, animatedCardY};
                     window->draw_image(animationPos, cardBack, imageWidth, imageHeight);
@@ -428,7 +405,6 @@ void BlackJackGame::blackJack() {
                 }
 
             case GameState::ShowDealerHand:
-            std::cout << "SDH" << std::endl;
 
                 if (delayCounter < 60) {
                     delayCounter += 1;
@@ -461,7 +437,6 @@ void BlackJackGame::blackJack() {
                 break;
 
             case GameState::WaitingForBet:
-            std::cout << "WFB" << std::endl;
 
 
             default:

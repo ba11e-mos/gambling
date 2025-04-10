@@ -54,6 +54,7 @@ class BlackJackGame {
         void stand();
         void split();
         void doubleDown();
+
 };
 
 bool isAce(Card card);

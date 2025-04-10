@@ -367,6 +367,10 @@ SDL_Window* TDT4102::AnimationWindow::getWindowHandle() {
     return windowHandle;
 }
 
+SDL_Renderer* TDT4102::AnimationWindow::getRendererHandle() {
+    return rendererHandle;
+}
+
 bool TDT4102::AnimationWindow::is_left_mouse_button_down() const {
     return currentLeftMouseButtonState;
 }

@@ -1,11 +1,5 @@
-#include "AnimationWindow.h"
-#include "widgets/TextInput.h"
-#include "widgets/Button.h"
 #include "login.h"
-#include "choices.h"
-#include <fstream>
-#include <string>
-#include <iostream>
+
 
 
 login::login(player* playerPtr) 

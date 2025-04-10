@@ -1,6 +1,13 @@
+#pragma once
+
 #include "AnimationWindow.h"
 #include "widgets/TextInput.h"
 #include "player.h"
+#include "widgets/Button.h"
+#include "choices.h"
+#include <fstream>
+#include <string>
+#include <iostream>
 
 class login {
     private:
