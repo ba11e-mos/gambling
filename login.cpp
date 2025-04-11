@@ -1,7 +1,5 @@
 #include "login.h"
 
-
-
 login::login(player* playerPtr) 
     : nameInput(TDT4102::Point{0, 0}, 0, 0, ""), window(nullptr), currentPlayer(playerPtr)
 {
@@ -18,7 +16,6 @@ int login::loginWindow() {
     window = new TDT4102::AnimationWindow(1920/2-windowWidth/2, 1080/2-windowHeight/2, windowWidth, windowHeight, windowTitle);
 
     /*Info tekst*/
-    
     std::string info = "LET'S GO GAMBLING!";
     int infoFontSize = 40;
     int infoWidth = info.length()*infoFontSize*0.6;
@@ -34,7 +31,7 @@ int login::loginWindow() {
     const unsigned int textWidth = windowWidth/2;
     const unsigned int textHeight = windowHeight/7;
     const TDT4102::Point inputPosition {static_cast<int>((windowWidth / 2) - (textWidth / 2)),static_cast<int>((windowHeight / 2) - (windowHeight / 4))};    
-    const std::string textPlaceholder = "Brukernavn";
+    const std::string textPlaceholder = "";
     nameInput = TDT4102::TextInput{inputPosition, textWidth, textHeight, textPlaceholder};
     window->add(nameInput);
     nameInput.setCallback([this]() { checkUser(); }); 
@@ -90,8 +87,7 @@ void login::checkUser() {
     infile.close();
 
     if (userExists) {
-        std::cout << usernameText << std::endl;       
-        usernameText = "Brukernavnet " + username + " er allerede i bruk. \n Vil du bruke dette."; //må fikse newline her
+        usernameText = "Vil du bruke " + username + " som brukernavn?"; //må fikse newline her
     }   else {
         usernameText.clear();
     }

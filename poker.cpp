@@ -44,26 +44,21 @@ PokerGame::PokerGame(player* playerPtr, int botCount) : CurrentPlayer(playerPtr)
 }
 
 
-PokerGame::~PokerGame(){
+PokerGame::~PokerGame() {
     delete window;
 
     for (auto playerPtr : players) {
+        for (Card* card : playerPtr->hand) {
+            delete card; 
+        }
         delete playerPtr;
     }
     players.clear();
 
-    for (auto* card : table) {
+    for (Card* card : table) {
         delete card;
     }
     table.clear();
-    
-    for (auto* p : players) {
-        for (auto* card : p->hand) {
-            delete card;
-        }
-        p->hand.clear();
-    }
-
 }
 
 
@@ -382,7 +377,7 @@ void PokerGame::resetRound(){
     *pot = 0;
 
     for (player* p : players) {
-        //for (Card* c : p->hand) delete c;
+        for (Card* c : p->hand) delete c;
         p->hand.clear();
         p->hasFolded = false;
 
@@ -401,6 +396,7 @@ void PokerGame::resetRound(){
 /*hand evaluation...ew*/
 EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     std::vector<Card*> cards = getAllCards(player, table);
+    std::cout << "evaluating" << std::endl;
 
     std::map<int, int> valueCount;
     std::map<Suit, int> suitCount;
@@ -413,12 +409,17 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
         values.push_back(val);
     }
 
+    std::cout << "1" << std::endl;
+
     /*sort high to low*/
     std::sort(values.begin(), values.end(), std::greater<int>());
 
     /*remove duplicates (had help with this one)*/
     std::vector<int> uniqueValues = values;
     uniqueValues.erase(std::unique(uniqueValues.begin(), uniqueValues.end()), uniqueValues.end());
+
+    std::cout << "2" << std::endl;
+
 
     /*flush check*/
     bool isFlush = false;
@@ -428,6 +429,9 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
             break;
         }
     }
+
+    std::cout << "3 " << uniqueValues.size() << std::endl;
+
 
     /*straight check, gay?*/
     bool isStraight = false;
@@ -448,6 +452,10 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
             }
         }
     }
+    
+
+    std::cout << "4" << std::endl;
+
 
     /*A2345 straight*/
     if(!isStraight && std::find(uniqueValues.begin(), uniqueValues.end(), 14) != uniqueValues.end()){
@@ -456,6 +464,9 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
             isStraight = true;
         }
     }    
+
+    std::cout << "5" << std::endl;
+
 
     /*groups*/
     int pairCount = 0;
@@ -481,31 +492,53 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
         }
     }
 
-    HandRank rank = HandRank::HighCard;
+    std::cout << "6" << std::endl;
+
+
+    HandRank rank;
 
     if(isFlush && isStraight){
         rank = HandRank::StraightFlush;
+        std::cout << "SF" << std::endl;
+
     }
     else if(four){
         rank = HandRank::FourOfAKind;
+        std::cout << "FOK" << std::endl;
+
     }
     else if((tripleCount >= 1) && (pairCount >= 1 || tripleCount >= 2)) {
         rank = HandRank::FullHouse;
+        std::cout << "FH" << std::endl;
+
     }
     else if(isFlush){
         rank  = HandRank::Flush;
+        std::cout << "F" << std::endl;
+
     }
     else if(isStraight){
         rank = HandRank::Straight;
+        std::cout << "S" << std::endl;
+
     }
     else if(tripleCount >= 1){
         rank = HandRank::ThreeOfAKind;
+        std::cout << "TOK" << std::endl;
+
     }
     else if(pairCount >= 2){
         rank = HandRank::TwoPair;
+        std::cout << "TP" << std::endl;
+
     }
     else if(pairCount == 1){
         rank = HandRank::OnePair;
+        std::cout << "OP" << std::endl;
+
+    } else {
+        rank = HandRank::HighCard;
+        std::cout << "HC" << std::endl;
     }
 
     std::sort(groupedValues.begin(), groupedValues.end(), std::greater<int>());
@@ -516,9 +549,16 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
 
 void PokerGame::evaluateHands(){
     std::vector<EvaluatedHand> results;
+    std::cout << "evaluating hands" << std::endl;
+
+    std::cout << players[0]->hand[0]->toString() << " " <<  players[0]->hand[1]->toString() << std::endl;
+    std::cout << players[1]->hand[0]->toString() << " " <<  players[1]->hand[1]->toString() << std::endl;
+
 
     for(player* player : players){
         if(!player->hasFolded){
+            EvaluatedHand evalHand = evaluatePlayerHand(player);
+            std::cout << "HandRank value: " << static_cast<int>(evalHand.rank) << std::endl;            
             results.push_back(evaluatePlayerHand(player));
         }
     }
