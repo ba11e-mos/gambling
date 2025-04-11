@@ -431,16 +431,22 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
 
     /*straight check, gay?*/
     bool isStraight = false;
-    for(size_t i = 0; i <= uniqueValues.size() - 5 && !isStraight; i++){
-        bool straight = true;
-        for(int j = 0; j < 4; j++){
-            if(uniqueValues[i+j]-1 != uniqueValues[i+j]+1)
-            straight = false;
-            break;
+
+    if (uniqueValues.size() >= 5) {
+        for (size_t i = 0; i <= uniqueValues.size() - 5 && !isStraight; i++) {
+            bool straight = true;
+            for (int j = 0; j < 4; j++) {
+                if (uniqueValues[i + j] - 1 != uniqueValues[i + j + 1]) {
+                    straight = false;
+                    break;
+                }
+            }
+
+            if (straight) {
+                isStraight = true;
+                break;
+            }
         }
-
-        if(straight){isStraight = true; break;}
-
     }
 
     /*A2345 straight*/
@@ -452,8 +458,9 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     }    
 
     /*groups*/
-    int pairs = 0;
-    bool three, four = false;
+    int pairCount = 0;
+    int tripleCount = 0;
+    bool four = false;
     std::vector<int> groupedValues;
 
     for(auto& [val, count] : valueCount){
@@ -462,11 +469,11 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
             groupedValues.insert(groupedValues.begin(), 4, val);
         }
         else if(count == 3){
-            three = true;
+            tripleCount++;
             groupedValues.insert(groupedValues.begin(), 3, val);
         }
         else if(count == 2){
-            pairs++;
+            pairCount++;
             groupedValues.insert(groupedValues.begin(), 2, val);
         }
         else{
@@ -482,7 +489,7 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     else if(four){
         rank = HandRank::FourOfAKind;
     }
-    else if(three && pairs >= 1) {
+    else if((tripleCount >= 1) && (pairCount >= 1 || tripleCount >= 2)) {
         rank = HandRank::FullHouse;
     }
     else if(isFlush){
@@ -491,13 +498,13 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     else if(isStraight){
         rank = HandRank::Straight;
     }
-    else if(three){
+    else if(tripleCount >= 1){
         rank = HandRank::ThreeOfAKind;
     }
-    else if(pairs >= 2){
+    else if(pairCount >= 2){
         rank = HandRank::TwoPair;
     }
-    else if(pairs == 1){
+    else if(pairCount == 1){
         rank = HandRank::OnePair;
     }
 
@@ -505,6 +512,7 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
 
     return EvaluatedHand{rank, groupedValues, player};
 }
+
 
 void PokerGame::evaluateHands(){
     std::vector<EvaluatedHand> results;
