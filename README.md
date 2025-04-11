@@ -1,57 +1,43 @@
 # TDT4102 - Prosjekt
 
-## Hvordan sette opp på datamaskinen
+https://github.com/ba11e-mos/gambling
 
-### Prerequisites 
-* TDT4102 biblioteket i Vscode
-* Git
+## Beskrivelse av programmet
 
-### Set-up
-1. Lag en mappe til prosjektet.
-2. I VSCode trykk "Shift + Ctrl + P" og kjør "TDT4102: Create Project from TDT4102 template." -> "Blank Project"
-3. Pull eller Clone github repoet i samme mappe som du lagde i trinn 1.
-4. Du er good to go ":)"
+Gambling++ er et program som lar brukeren spille tre populære pengespill:
+- **Poker:** Spillet følger reglene for Texas Hold'em, hvor spilleren kan satse, 'checke'/stå, eller kaste seg.
+- **BlackJack:** Målet er å få en håndverdi nærmest mulig 21 uten å gå over. Spilleren kan trekke kort eller stå.
+- **Slots:** Et klassisk spill hvor spilleren kan spinne et hjul med kort og vinne basert på antall kort av samme sort.
 
-## Github basics
+## Logikk og implementasjon
 
+Kortstokken er implementert som en `CardDeck`-klasse som inneholder en liste over `Card`-objekter. Kortene trekkes og stokkes dynamisk, og samme kortstokk gjenbrukes mellom spillene.
 
-### Set-up
-Letteste måten å hente ett repo er å klone det hvis det er offentlig. Men i dette tilfellet må du bruke din egen bruker. 
+BlackJack og Poker bruker spilltilstander (`GameState`) for å håndtere de ulike fasene i spillene, som å trekke kort, animere trekking, avgjøre vinneren osv.
 
-Det letteste er å bruke SSH. For å sette opp dette åpner man terminalen (Linux) og gjør følgende.
+Brukergrensesnittet er bygget med SDL2 og AnimationWindow, vi bruker en klasse `GameWindow` som arver fra AnimationWindow som legger til funksjoner som sikrer at spillene ser like ut.
 
-1. `ssh-keygen -t ed25519 -b 4096 -C "din-epost@eksempel.com"`
-2. `eval "$(ssh-agent -s)"`
-3. `ssh-add ~/.ssh/id_ed25519`
-4. `cat ~/.ssh/id_ed25519.pub`
-5. Kopier outputten fra steg 4. (hele greia) og åpne brukerinnstillingene på github.
-6. Gå til "SSH and GPG keys" og trykk "New SSH key"
-7. Lim inn teksten fra seg 4. 
-8. Du kan nå pushe/pulle.
+## Ressurser brukt i prosjektet
+- **AnimationWindow:** Endret for å støtte alpha-kanalen og legge til en egen font.
+- **Reddit/StackOverflow:** Brukt til å finne løsninger på problemer med SDL2 og AnimationWindow.
+- **ChatGPT/Copilot:** Brukt til debugging av absurde feilmeldinger.
+- **SDL2-dokumentasjon:** [https://wiki.libsdl.org/SDL2/FrontPage](https://wiki.libsdl.org/SDL2/FrontPage)
 
-### Hvordan bruke github.
+## !!OBS!!
+På grunn av endringene gjort til filer i AnimationWindow må disse filene også være med for at koden skal funke. (Font.h, FontCache.cpp, FontCache.cpp, AnimationWindow.cpp, AnimationWindow.h)
 
-Anbefaler å sette opp origins.
-1. I mappen du skal kjøre prosjektet i, kjør `git init`
-2. `git remote add origin git@github.com:ba11e-mos/gambling.git`
-3. `git branch -M main`
+Hvis grafikkene ser feil ut (for store/for små) er det mest sannsynlig at du har på skjermskalering på datamaskinen din. Sett denne ned/opp til 100% for best spilleopplevelse.
 
-Nå kan du kjøre "git pull origin main" for å hente repoet. 
+## Hvordan sette opp og bygge programmet
 
-### Hvordan pushe til dette prosjektet
+1. Last ned og sett opp TDT4102 biblioteket i vsCode.
+2. Opprett nytt tomt prosjekt med TDT4102.
+3. Pakk ut .zip mappen til prosjektet. Eller bruk `git clone https://github.com/ba11e-mos/gambling`
+4. Ctrl + F5 for å bygge og kjøre programmet.
 
-Siden TDT4102 biblioteket kjører ulikt på ulike maskiner er det viktig å ikke laste opp filer som inneholder "environment variables" feks. meson.build og lignende.
+## Hvordan kjøre programmet
 
-Når man pusher gjør man derfor:
-1. Legg kun til filene man vi pushe `git add 'filer'`
-2. Legg til hjelpsom commit message `git commit -m 'Denne teksten har mening'`
-3. Nå er du klar til å pushe. `git push origin main`
-
-Hvis man vil pushe til en annen branch for sammenligning endrer man bare til `git push origin 'branch'`
-
-
-
-
-
-
-Her ligger kun c++ kodefiler, build og backend lages på din pc for å sikre at det ikke skjer noe fucky.
+1. Last ned .zip mappen til ditt system fra [https://github.com/ba11e-mos/gambling/releases](utgivlesene).
+2. Pakk ut .zip filen til en mappe (spiller ingen rolle hvor så lenge alle filene er samlet)
+3. Kjør .exe filen (windows) eller ELF filen (linux).
+4. Kos deg!
