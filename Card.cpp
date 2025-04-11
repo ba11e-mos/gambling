@@ -17,7 +17,7 @@ Rank Card::getRank() const{
     return r;
 }
 
-string Card::toString() const{
+std::string Card::toString() const{
     return rankToString(r) + " of " + suitToString(s);
 }
 

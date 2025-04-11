@@ -2,7 +2,6 @@
 #include <iostream>
 #include <map>
 #include <string>
-using namespace std;
 
 enum class Suit {
 	clubs, 
@@ -27,7 +26,7 @@ enum class Rank {
 	ace
 };
 
-const map<Rank, string> rankToStringMap {
+const std::map<Rank, std::string> rankToStringMap {
 	{Rank::two, "two"},
 	{Rank::three, "three"},
 	{Rank::four, "four"},
@@ -43,7 +42,7 @@ const map<Rank, string> rankToStringMap {
 	{Rank::ace, "ace"}
 };
 
-const map<Suit, string> SuitToStringMap {
+const std::map<Suit, std::string> SuitToStringMap {
 	{Suit::clubs, "clubs"},
 	{Suit::diamonds, "diamonds"},
 	{Suit::hearts, "hearts"},
@@ -51,9 +50,9 @@ const map<Suit, string> SuitToStringMap {
 };
 
 
-string suitToString(Suit suit);
+std::string suitToString(Suit suit);
 
-string rankToString(Rank rank);
+std::string rankToString(Rank rank);
 
 class Card {
 	private:

@@ -19,9 +19,7 @@ CardDeck::CardDeck() {
 }
 
 void CardDeck::swap(int indeks1, int indeks2) {
-    Card temp = cards[indeks1];
-    cards[indeks1] = cards[indeks2];
-    cards[indeks2] = temp;
+    std::swap(cards[indeks1], cards[indeks2]);
 }
 
 void CardDeck::print() const {
@@ -74,6 +72,7 @@ Card CardDeck::drawCard() {
 
 void CardDeck::resetDeck() {
     cards.clear();
+    cards.shrink_to_fit();
     for (int suit = static_cast<int>(Suit::clubs); suit <= static_cast<int>(Suit::spades); ++suit) {
         for (Rank rank : {Rank::two, Rank::three, Rank::four, Rank::five, Rank::six, Rank::seven, Rank::eight, Rank::nine, Rank::ten, Rank::jack, Rank::queen, Rank::king, Rank::ace}) {
             cards.emplace_back(static_cast<Suit>(suit), static_cast<Rank>(rank));
