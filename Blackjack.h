@@ -8,6 +8,7 @@
 #include "widgets/Slider.h"
 #include <thread>
 #include <chrono>
+#include "GameWindow.h"
 
 enum class GameState {
     WaitingForBet,
@@ -25,8 +26,8 @@ enum class GameState {
 class BlackJackGame {
     private: 
         player* currentPlayer;
-        TDT4102::AnimationWindow* window;
-
+        GameWindow* window;
+        
         CardDeck deck;
         vector<Card> playerHand;
         vector<Card> dealerHand;

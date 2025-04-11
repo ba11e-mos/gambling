@@ -1,6 +1,8 @@
 #include "Blackjack.h"
 
-BlackJackGame::BlackJackGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr), gameState(GameState::WaitingForBet) {}
+BlackJackGame::BlackJackGame(player* playerPtr)
+    : currentPlayer(playerPtr),
+      window(new GameWindow(800, 600, "BlackJack++", playerPtr->getUsername(), playerPtr->getMoney())) {}
 
 BlackJackGame::~BlackJackGame() {
     delete window;
@@ -61,33 +63,11 @@ void BlackJackGame::drawDealerCard() {
 
 void BlackJackGame::blackJack() {
 
-    /*Spillvindu*/
-    std::string windowTitle = "Gambling++";
-    window = new TDT4102::AnimationWindow(0, 0, 800, 600, windowTitle);
-
-    #ifdef _WIN32
-        SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
-    #endif
-
-    #ifdef __linux__
-        SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
-        setenv("SDL_VIDEO_X11_SCALING", "1", 1);
-    #endif
-
-    SDL_Window* sdlWindow = window->getWindowHandle();
-    if (!sdlWindow) {
-        std::cerr << "Failed to get SDL window handle." << std::endl;
-        return;
-    }
-
-    if (SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
-        std::cerr << "Failed to set fullscreen mode: " << SDL_GetError() << std::endl;
-        return;
-    }
+    /*Fullskjerm*/
+    window->setFullscreen(true);
 
     int windowWidth, windowHeight;
-    SDL_GetRendererOutputSize(window->getRendererHandle(), &windowWidth, &windowHeight);
-
+    window->getWindowSize(windowWidth, windowHeight);
     std::cout << "Vindusstørrelse: " << windowWidth << "x" << windowHeight << std::endl;
 
     /*Brukernavn*/
@@ -268,7 +248,7 @@ void BlackJackGame::blackJack() {
         bool escDown = window->is_key_down(KeyboardKey::ESCAPE);
 
         /*Bakgrunn*/
-        window->draw_rectangle(bgPosition, windowWidth, windowHeight, bgColor);
+        window->drawBackground(bgColor);
         window->draw_image(decalPos, decal, decalWidth, decalHeight);
         window->draw_image(cardCirclePos, circle, circleWidth, circleHeight);
 
@@ -572,9 +552,7 @@ void BlackJackGame::blackJack() {
         
 
         //Brukernavn, penger og innsats
-        pointsString = currentPlayer->formatDouble(currentPlayer->getMoney());
-        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, font);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, font);
+        window->drawUsernameAndMoney({10, 10}, {windowWidth, 10});
 
         std::string betString = std::to_string(betSlider.getValue());
         window->draw_text(betTextPosition, betString, TDT4102::Color::white, betFontSize, font);

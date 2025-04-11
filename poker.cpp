@@ -1,7 +1,10 @@
 #include "poker.h"
 #include <random>
 
-PokerGame::PokerGame(player* playerPtr, int botCount) : CurrentPlayer(playerPtr), window(nullptr), botCount(botCount) {
+PokerGame::PokerGame(player* playerPtr, int botCount) 
+    : CurrentPlayer(playerPtr),
+    window(new GameWindow(1280, 1080, "Texas hold'em++", playerPtr->getUsername(), playerPtr->getMoney())),
+    botCount(botCount) {
 
     PokerDeck.shuffle();
     table.reserve(5);
@@ -65,10 +68,8 @@ PokerGame::~PokerGame() {
 
 void PokerGame::Poker(){
     
-    std::string windowTitle = "Texas hold'em";
     const unsigned int windowHeight = 1080;
     const unsigned int windowWidth = 1280;
-    window = new TDT4102::AnimationWindow(300, 10, windowWidth, windowHeight, windowTitle);
 
     
     std::string userName = CurrentPlayer->getUsername();
@@ -143,6 +144,17 @@ void PokerGame::Poker(){
     const TDT4102::Point betTextPosition {(windowWidth*3/4-betWidth/4), static_cast<int>(windowHeight-1.5*betHeight)};
     window->add(betSlider);
 
+    /*Bakgrunn*/
+    TDT4102::Color bgColor(0x00556b2f); 
+    TDT4102::Point bgPosition {0,0};
+
+    /*Win-overlay*/
+    TDT4102::Color overlayColor(0, 0, 0, 128); 
+    TDT4102::Point overlayPosition {0,0};
+    const unsigned int winFontSize = 50;
+    double winAmount = 0;
+    int delayCounter = 0;
+
     /*Callback functions*/
     bool hasBetThisRound = false;
     betButton.setCallback([this, &betSlider](){
@@ -185,7 +197,12 @@ void PokerGame::Poker(){
     while (!window->should_close()){
         window->next_frame();
 
-        window->setBackgroundColor(TDT4102::Color::sea_green);
+        bool mouseDown = window->is_left_mouse_button_down();
+        bool spaceKeyDown = window->is_key_down(KeyboardKey::SPACE);
+        bool escDown = window->is_key_down(KeyboardKey::ESCAPE);
+
+
+        window->drawBackground(bgColor);
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
@@ -210,10 +227,7 @@ void PokerGame::Poker(){
             window->draw_image(handPos, *handImages[index], imageWidth, imageHeight);
         }
 
-        std::string pointsString = std::to_string(CurrentPlayer->getMoney());
-
-        window->draw_text(namePosition, userName, TDT4102::Color::black, nameFontSize, TDT4102::Font::pixeloid);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, FundFontSize, TDT4102::Font::pixeloid);
+        window->drawUsernameAndMoney({10, 10}, {windowWidth, 10});
 
         /* maybe?
         if(CurrentPlayer->getMoney()<=0){
@@ -256,9 +270,12 @@ void PokerGame::Poker(){
             prevGameState = GameStateP::Showdown;
 
             evaluateHands();
-            std::cout << "Round over! Winner has been paid out." << std::endl;
-            gameState = GameStateP::Reset;
+            gameState = GameStateP::Results;
             break;
+
+        case GameStateP::Results:
+            break;
+
         
         case GameStateP::Reset:
             hasBetThisRound = false;
@@ -269,6 +286,34 @@ void PokerGame::Poker(){
             gameState = GameStateP::Betting;
             break;
         }
+        
+
+        /*Win overlay*/
+        if (gameState == GameStateP::Results) {
+            if (delayCounter > 30) {
+                window->draw_rectangle(overlayPosition, windowWidth, windowHeight, overlayColor);
+                TDT4102::Point bigWinPos {static_cast<int>((windowWidth/2)-(3.5*winFontSize)/2), static_cast<int>(windowHeight/2-4*winFontSize)};
+                TDT4102::Point winPos {static_cast<int>((windowWidth/2)-(winnerNameAndHand.length()*winFontSize)/8), static_cast<int>(windowHeight/2-2*winFontSize)};
+
+                if (CurrentPlayer == winner) {
+                    window->draw_text(bigWinPos, "Du vant!", TDT4102::Color::gold, winFontSize, TDT4102::Font::pixeloid);
+                } else {
+                    window->draw_text(bigWinPos, "Du tapte!", TDT4102::Color::gold, winFontSize, TDT4102::Font::pixeloid);
+
+                }
+                window->draw_text(winPos, winnerNameAndHand, TDT4102::Color::white, winFontSize / 2, TDT4102::Font::pixeloid);
+
+        
+                if (mouseDown || spaceKeyDown) {
+                    delayCounter = 0;
+                    gameState = GameStateP::Reset;
+                    
+                }
+            } else {
+                delayCounter += 1;
+            }
+        }
+
     }
 }
 
@@ -396,7 +441,6 @@ void PokerGame::resetRound(){
 /*hand evaluation...ew*/
 EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     std::vector<Card*> cards = getAllCards(player, table);
-    std::cout << "evaluating" << std::endl;
 
     std::map<int, int> valueCount;
     std::map<Suit, int> suitCount;
@@ -409,7 +453,6 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
         values.push_back(val);
     }
 
-    std::cout << "1" << std::endl;
 
     /*sort high to low*/
     std::sort(values.begin(), values.end(), std::greater<int>());
@@ -418,7 +461,6 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     std::vector<int> uniqueValues = values;
     uniqueValues.erase(std::unique(uniqueValues.begin(), uniqueValues.end()), uniqueValues.end());
 
-    std::cout << "2" << std::endl;
 
 
     /*flush check*/
@@ -430,7 +472,6 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
         }
     }
 
-    std::cout << "3 " << uniqueValues.size() << std::endl;
 
 
     /*straight check, gay?*/
@@ -454,7 +495,6 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
     }
     
 
-    std::cout << "4" << std::endl;
 
 
     /*A2345 straight*/
@@ -465,7 +505,6 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
         }
     }    
 
-    std::cout << "5" << std::endl;
 
 
     /*groups*/
@@ -492,7 +531,6 @@ EvaluatedHand PokerGame::evaluatePlayerHand(player* player){
         }
     }
 
-    std::cout << "6" << std::endl;
 
 
     HandRank rank;
@@ -574,8 +612,26 @@ void PokerGame::evaluateHands(){
         return a.rankedValues > b.rankedValues;
     });
 
-    player* winner = results.front().playerPtr;
+    winner = results.front().playerPtr;
     std::string winnerName = winner->getUsername();
-    std::cout << "The winner is: " << winnerName << std::endl;
-    winner->addMoney(*pot);  
+    HandRank winningHand = results.front().rank;
+
+    winner->addMoney(*pot);
+    winnerNameAndHand = winnerName + " vant med " + handRankToString(winningHand) + "!";
+    std::cout << winnerNameAndHand << std::endl; 
+}
+
+std::string PokerGame::handRankToString(HandRank rank) {
+    switch (rank) {
+        case HandRank::HighCard: return "High Card";
+        case HandRank::OnePair: return "One Pair";
+        case HandRank::TwoPair: return "Two Pair";
+        case HandRank::ThreeOfAKind: return "Three of a Kind";
+        case HandRank::Straight: return "Straight";
+        case HandRank::Flush: return "Flush";
+        case HandRank::FullHouse: return "Full House";
+        case HandRank::FourOfAKind: return "Four of a Kind";
+        case HandRank::StraightFlush: return "Straight Flush";
+        default: return "Unknown Hand";
+    }
 }

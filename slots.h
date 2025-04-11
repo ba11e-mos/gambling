@@ -10,12 +10,13 @@
 #include <vector>
 #include <filesystem>
 #include <math.h>
+#include "GameWindow.h"
 
 
 class SlotsGame{
     private:
         player* currentPlayer;
-        TDT4102::AnimationWindow* window;
+        GameWindow* window;
 
         Card** slotsMatrix;
         std::string** cardFilePaths;

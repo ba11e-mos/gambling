@@ -1,6 +1,6 @@
 #include "slots.h"
 
-SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(nullptr) {
+SlotsGame::SlotsGame(player* playerPtr) : currentPlayer(playerPtr), window(new GameWindow(800, 600, "Slots++", playerPtr->getUsername(), playerPtr->getMoney())) {
     slotsMatrix = new Card*[rows];
     cardFilePaths = new std::string*[rows];
     slotsImageMatrix = new TDT4102::Image*[rows];
@@ -32,31 +32,11 @@ SlotsGame::~SlotsGame() {
 }
 
 void SlotsGame::slots() {
-    std::string windowTitle = "Gambling++";
-    window = new TDT4102::AnimationWindow(0, 0, 800, 600, windowTitle);
-
-    #ifdef _WIN32
-        SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
-    #endif
-
-    #ifdef __linux__
-        SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
-        setenv("SDL_VIDEO_X11_SCALING", "1", 1);
-    #endif
-
-    SDL_Window* sdlWindow = window->getWindowHandle();
-    if (!sdlWindow) {
-        std::cerr << "Failed to get SDL window handle." << std::endl;
-        return;
-    }
-
-    if (SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
-        std::cerr << "Failed to set fullscreen mode: " << SDL_GetError() << std::endl;
-        return;
-    }
+    /*Fullskjerm*/
+    window->setFullscreen(true);
 
     int windowWidth, windowHeight;
-    SDL_GetRendererOutputSize(window->getRendererHandle(), &windowWidth, &windowHeight);
+    window->getWindowSize(windowWidth, windowHeight);
 
     std::cout << "Vindusstørrelse: " << windowWidth << "x" << windowHeight << std::endl;
 
@@ -164,11 +144,9 @@ void SlotsGame::slots() {
             } 
         }
         
-        //Bakgrunn (ikke i bruk rn)
-        //window->draw_rectangle(bgPosition, windowWidth, windowHeight, bgColor);
+        //Bakgrunn
+        window->drawBackground(bgColor);
 
-        //pengeverdi oppdatering
-        std::string pointsString = currentPlayer->formatDouble(currentPlayer->getMoney());
 
         //innsats oppdatering
         std::string betString = std::to_string(betSlider.getValue());
@@ -176,8 +154,8 @@ void SlotsGame::slots() {
 
 
         //brukernavn og penger på skjerm
-        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, font);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, font);
+        window->drawUsernameAndMoney({10, 10}, {windowWidth, 10});
+
         
         //spillvindu
         window->draw_rectangle(playSquarePosition, playSquareWidth, playSquareHeight, playSquareFill, playSquareEdge);

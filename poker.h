@@ -9,6 +9,7 @@
 #include "CardDeck.h"
 #include <vector>
 #include <filesystem>
+#include "GameWindow.h"
 
 enum class HandRank {
     HighCard = 1,
@@ -28,6 +29,7 @@ enum GameStateP {
     Turn,
     River,
     Showdown,
+    Results,
     Reset
 };
 
@@ -54,11 +56,11 @@ private:
     double* pot;
     bool roundInProgress;
     GameStateP gameState;
-    GameStateP prevGameState;
+    GameStateP prevGameState = GameStateP::Betting;
 
     
     // GUI
-    TDT4102::AnimationWindow* window;
+    GameWindow* window;
     std::vector<std::shared_ptr<TDT4102::Image>> tableImages;
     std::vector<std::shared_ptr<TDT4102::Image>> handImages;
 
@@ -76,6 +78,8 @@ private:
     std::vector<Card*> getAllCards(player* p, const std::vector<Card*>& table);
     EvaluatedHand evaluatePlayerHand(player* p);
     std::string handRankToString(HandRank rank);
+    std::string winnerNameAndHand;
+    player* winner; 
     
 
 

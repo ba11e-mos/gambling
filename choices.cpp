@@ -48,24 +48,31 @@ int chooseGame(player* currentPlayer) {
 }
 
 void playSlots(player* currentPlayer){
-    SlotsGame SlotsGame(currentPlayer);
-    std::cout << "Slots" << std::endl;
+    choiceWindow->close();
     delete choiceWindow;
+    choiceWindow = nullptr;
+    
+    SlotsGame SlotsGame(currentPlayer);
     SlotsGame.slots();
-    std::cout << "Slots ferdig" << std::endl;
     return;
 }
 
 void playBlackJack(player* currentPlayer){
-    BlackJackGame BlackJackGame(currentPlayer);
-    std::cout << "BJ" << std::endl;
+    choiceWindow->close();
     delete choiceWindow;
-    BlackJackGame.blackJack();
-    std::cout << "BJ ferdig" << std::endl;
+    choiceWindow = nullptr;
+
+    BlackJackGame blackJackGame(currentPlayer);
+    blackJackGame.blackJack();
     return;
 }
 
 void PlayPoker(player* currentPlayer){
+    choiceWindow->close();
+    delete choiceWindow;
+    choiceWindow = nullptr;
+
     PokerGame PokerGame(currentPlayer, 1);
     PokerGame.Poker();
+    return;
 }

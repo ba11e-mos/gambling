@@ -11,22 +11,23 @@ int main() {
 
  
 	player currentPlayer;
- 
-  currentPlayer.registerUser("noa", 1000);
+/*    
+  currentPlayer.registerUser("noa", 1000); 
+  
+ BlackJackGame BlackJackGame(&currentPlayer);
+  BlackJackGame.blackJack();
+  
 
-  PokerGame PokerGame(&currentPlayer);
-  PokerGame.Poker();
-/* 
   SlotsGame SlotsGame(&currentPlayer);
   SlotsGame.slots();
+PokerGame PokerGame(&currentPlayer);
+  PokerGame.Poker();
 
-  /*
-  BlackJackGame BlackJackGame(&currentPlayer);
-  BlackJackGame.blackJack();
 
+  */
   login loginWindow(&currentPlayer);
 
   loginWindow.loginWindow();
- */ 
+
   return 0;  
 }
