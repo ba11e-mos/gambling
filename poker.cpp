@@ -124,7 +124,7 @@ void PokerGame::Poker(){
     window->add(standButton);
 
     /*pot GUI, grass??*/
-    const TDT4102::Point potPosition {playSquarePosition.x, playSquarePosition.y-(imageHeight/2+betHeight)};
+    const TDT4102::Point potPosition {playSquarePosition.x, static_cast<int>(playSquarePosition.y-(imageHeight/2+betHeight))};
     const int potWidth = betWidth;
     const int potHeight = betHeight;
     const TDT4102::Point potText {potPosition.x, potPosition.y-(potWidth/2+10)};
@@ -223,7 +223,7 @@ void PokerGame::Poker(){
         }
           
         for(int index = 0; index < size(handImages); index++){
-            TDT4102::Point handPos{(windowWidth/2-imageWidth)+(imageWidth*3/4)*index, windowHeight-(imageHeight+75)};
+            TDT4102::Point handPos{static_cast<int>((windowWidth/2-imageWidth)+(imageWidth*3/4)*index), windowHeight-(imageHeight+75)};
             window->draw_image(handPos, *handImages[index], imageWidth, imageHeight);
         }
 
