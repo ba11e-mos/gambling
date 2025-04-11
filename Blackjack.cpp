@@ -127,20 +127,27 @@ void BlackJackGame::blackJack() {
     const TDT4102::Point betTextPosition {betSliderPosition.x-100, static_cast<int>(betSliderPosition.y+(betFontSize))};
     window->add(betSlider);
 
+    /*Kortsirkel*/
+    std::filesystem::path fileCircle = "assets";
+    fileCircle /= "circle.png";
+    TDT4102::Image circle(fileCircle.string());
+    static unsigned int circleWidth = static_cast<int>((windowWidth/6));
+    static unsigned int circleHeight = static_cast<int>((circleWidth));
+    TDT4102::Point cardCirclePos {static_cast<int>(windowWidth/2-circleWidth/2), static_cast<int>(windowHeight - circleHeight*1.25)};
+    
     /*Hit knapp*/
     const unsigned int hitWidth = static_cast<int>(windowWidth/12);
     const unsigned int hitHeight = hitWidth;
     TDT4102::Color seethroughColor(0, 0, 0, 96);
-    const TDT4102::Point hitPosition {static_cast<int>(windowWidth/3), static_cast<int>(windowHeight*(3.0/4) - hitHeight/2)};
+    const TDT4102::Point hitPosition {static_cast<int>(windowWidth/3), static_cast<int>(cardCirclePos.y+circleHeight/2 - hitHeight - 10)};
     std::string hitLabel = "Hit";
     TDT4102::Button hitButton {hitPosition, hitWidth, hitHeight, hitLabel};
     std::filesystem::path fileUCard = "assets";
     fileUCard /= "spades-unknown.png";
     TDT4102::Image unknownCard(fileUCard.string());
-    hitButton.setButtonColor(seethroughColor);
     hitButton.setLabelColor(TDT4102::Color::white);
-    hitButton.setButtonColor(TDT4102::Color::transparent);
-    hitButton.setButtonColorHover(seethroughColor);
+    hitButton.setButtonColor(TDT4102::Color::dark_blue);
+    //hitButton.setButtonColorHover(seethroughColor);
     window->add(hitButton);
 
 
@@ -148,7 +155,7 @@ void BlackJackGame::blackJack() {
     /*Stand knapp*/
     const unsigned int standWidth = static_cast<int>(windowWidth/12);
     const unsigned int standHeight = standWidth;
-    const TDT4102::Point standPosition {static_cast<int>(windowWidth/3), static_cast<int>(windowHeight*(3.0/4)+ standHeight/2)};
+    const TDT4102::Point standPosition {static_cast<int>(windowWidth/3), static_cast<int>(cardCirclePos.y+circleHeight/2 + 10)};
     std::string standLabel = "Stand";
     TDT4102::Button standButton {standPosition, standWidth, standHeight, standLabel};
     std::filesystem::path fileCross = "assets";
@@ -156,8 +163,9 @@ void BlackJackGame::blackJack() {
     TDT4102::Image cross(fileCross.string());
     standButton.setButtonColor(TDT4102::Color::transparent);
     standButton.setLabelColor(TDT4102::Color::white);
-    standButton.setButtonColor(TDT4102::Color::transparent);
-    standButton.setButtonColorHover(seethroughColor);
+    standButton.setButtonColor(TDT4102::Color::dark_red);
+    standButton.setFont(TDT4102::Font::pixeloid, 16);
+    //standButton.setButtonColorHover(seethroughColor);
     window->add(standButton);
 
 
@@ -206,14 +214,9 @@ void BlackJackGame::blackJack() {
     deck = CardDeck();
     deck.shuffle();
 
-    /*Kortsirkel*/
-    std::filesystem::path fileCircle = "assets";
-    fileCircle /= "circle.png";
-    TDT4102::Image circle(fileCircle.string());
-    static unsigned int circleWidth = static_cast<int>((windowWidth/6));
-    static unsigned int circleHeight = static_cast<int>((circleWidth));
-    TDT4102::Point cardCirclePos {static_cast<int>(windowWidth/2-circleWidth/2), static_cast<int>(windowHeight - circleHeight*1.25)};
-    
+    /*Hint*/
+    std::string hint = "Trykk 'BET' for å starte spillet.";
+    TDT4102::Point hintPos= {static_cast<int>(betPosition.x-(hint.length()*5)), betPosition.y - 50};
 
     /*Animering av korttrekkning*/
     TDT4102::Point startPos{static_cast<int>(windowWidth*(7.0/8)+(imageWidth/3)),static_cast<int>(0+imageHeight/3)};
@@ -438,7 +441,7 @@ void BlackJackGame::blackJack() {
 
             case GameState::WaitingForBet:
 
-
+                window->draw_text(hintPos, hint, TDT4102::Color::white, 20, font);
             default:
                 break;
         }
@@ -567,11 +570,11 @@ void BlackJackGame::blackJack() {
 
         //Brukernavn, penger og innsats
         pointsString = currentPlayer->formatDouble(currentPlayer->getMoney());
-        window->draw_text(namePosition, username, TDT4102::Color::black, nameFontSize, font);
-        window->draw_text(pointsPosition, pointsString, TDT4102::Color::black, pointsFontSize, font);
+        window->draw_text(namePosition, username, TDT4102::Color::white, nameFontSize, font);
+        window->draw_text(pointsPosition, pointsString, TDT4102::Color::white, pointsFontSize, font);
 
         std::string betString = std::to_string(betSlider.getValue());
-        window->draw_text(betTextPosition, betString, TDT4102::Color::black, betFontSize, font);
+        window->draw_text(betTextPosition, betString, TDT4102::Color::white, betFontSize, font);
     
         if (deck.cards.size() < 10) {
             std::cout << "Stokker om kortstokken" << std::endl;
