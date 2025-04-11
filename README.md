@@ -37,7 +37,7 @@ Hvis grafikkene ser feil ut (for store/for små) er det mest sannsynlig at du ha
 
 ## Hvordan kjøre programmet
 
-1. Last ned .zip mappen til ditt system fra [https://github.com/ba11e-mos/gambling/releases](utgivlesene).
+1. Last ned .zip mappen til ditt system fra [utgivlesene](https://github.com/ba11e-mos/gambling/releases)).
 2. Pakk ut .zip filen til en mappe (spiller ingen rolle hvor så lenge alle filene er samlet)
 3. Kjør .exe filen (windows) eller ELF filen (linux).
 4. Kos deg!
